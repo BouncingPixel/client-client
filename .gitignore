@@ -1,0 +1,13 @@
+# os files
+.DS_Store?
+Thumbs.db
+.com.apple.timemachine.supported
+
+# configuration files
+conf
+
+# npm files
+node_modules
+
+# vim swap files
+*.swp
