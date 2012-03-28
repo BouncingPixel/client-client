@@ -19,9 +19,15 @@
 			  		<input name="password" type="password" class="input-small" placeholder="password">
 			  		<button type="submit" class="btn">login</button>
 					</form>
-	  			{!body!}
 	  		</div>
 			</div>
+			<div class="row">
+				<div class="hero-unit span5 offset3">
+  				<h3>{heroTitle}</h3>
+  				<p>{heroDescription}</p>
+				</div>
+			</div>
+			<div class="row"></div>
 		</div>
   </body>
 </html>

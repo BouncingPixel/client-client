@@ -13,22 +13,24 @@
   var configuration;
   var express = require('./express');
   var consolidate = require('./consolidate');
+  var Logger = require('bunyan');
+  var log = new Logger( {name:'client-client'});
   var cc;
 
-  console.log( "=> CLIENT CLIENT: STARTING");
-  console.log( "==> CONFIGURATION: STARTING" );
+  log.info( "STARTUP: STARTING");
+  log.info( "CONFIGURATION: STARTING" );
   if( !require('path').existsSync( './conf/baseConfiguration.js' ) ) {
-    return console.log( "Error! No configuration file found.");
+    return log.error( "No configuration file found.");
   }
   configuration = require('./conf/baseConfiguration');
-  console.log( "==> CONFIGURATION: SUCCESS" );
+  log.info( "CONFIGURATION: SUCCESS" );
 
   // connect to the database
-  console.log( "==> DATABASE: STARTING" );
-  console.log( "==> DATABASE: SUCCESS" );
+  log.info( "DATABASE: STARTING" );
+  log.info( "DATABASE: SUCCESS" );
 
   // set up express configuration
-  console.log( "==> EXPRESS: STARTING" );
+  log.info( "EXPRESS: STARTING" );
   cc = express();
   cc.engine('dust', consolidate.dust );
   cc.configure( function() {
@@ -37,23 +39,24 @@
     cc.use( express.bodyParser() );
     cc.use( cc.router );
   });
-  console.log( "==> EXPRESS: SUCCESS" );
+  log.info( "EXPRESS: SUCCESS" );
 
   // set up routes
-  console.log( "==> ROUTES: STARTING" );
+  log.info( "ROUTES: STARTING" );
   cc.get( '/', function( req, res ) {
 
-    var locals = { title:'Initial title',
-                   body:'Initial body' };
+    var locals = { title:configuration.loginTitle,
+                   heroTitle:configuration.heroTitle,
+                   heroDescription:configuration.heroDescription };
     res.render('index', locals );
   });
-  console.log( "==> ROUTES: SUCCESS" );
+  log.info( "ROUTES: SUCCESS" );
 
   // start the express server listening
-  console.log( "==> LISTENING: STARTING" );
-  cc.listen( 8080 );
-  console.log( "==> LISTENING: SUCCESS" );
+  log.info( "LISTENING: STARTING" );
+  cc.listen( configuration.port );
+  log.info( "LISTENING: SUCCESS" );
 
-  console.log( "=> CLIENT CLIENT: SUCCESS" );
+  log.info( "STARTUP: SUCCESS" );
 
 }());
