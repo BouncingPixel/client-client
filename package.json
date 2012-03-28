@@ -1,0 +1,28 @@
+{
+  "name": "client-client",
+  "version": "0.0.1-11",
+  "dependencies": {
+    "mongodb": "",
+    "connect-mongodb": "",
+    "async": "",
+    "connect": "",
+    "cloudfiles": "",
+    "bcrypt": "",
+    "mime": "",
+    "debug": ""
+  },
+  "scripts": {
+    "start": "server.js"
+  },
+  "env": {
+    "NODE_ENV": "development",
+    "SUBDOMAIN": "client"
+  },
+  "subdomain": "client",
+  "engines": {
+    "node": "v0.6.x"
+  },
+  "repository": {},
+  "domains": [],
+  "databases": {}
+}
