@@ -13,8 +13,13 @@
   <body>
   	<div class="container">
 	  	<div class="row">
-	  		<div class="span4 offset4" style="text-align:center;">
-			  	<form class="well form-inline" method="POST" action="login">
+	  		<div class="span4 offset4 well" style="text-align:center;">
+	  			{#invalid}
+	  				{.}
+	  			{:else}
+	  				&nbsp;
+	  			{/invalid}
+			  	<form class="form-inline" method="POST" action="checkPassword">
 			  		<input name="username" type="text" class="input-small" placeholder="username">
 			  		<input name="password" type="password" class="input-small" placeholder="password">
 			  		<button type="submit" class="btn">login</button>

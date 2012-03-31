@@ -1,15 +1,16 @@
 {
   "name": "client-client",
-  "version": "0.0.1-11",
+  "version": "0.0.1",
   "dependencies": {
     "mongodb": "",
     "connect-mongodb": "",
-    "async": "",
+    "async": "0.1.x",
     "connect": "",
     "cloudfiles": "",
     "bcrypt": "",
     "mime": "",
-    "debug": ""
+    "debug": "",
+    "bunyan": "0.6.x"
   },
   "scripts": {
     "start": "server.js"
@@ -20,7 +21,7 @@
   },
   "subdomain": "client",
   "engines": {
-    "node": "v0.6.x"
+    "node": "0.6.x"
   },
   "repository": {},
   "domains": [],
