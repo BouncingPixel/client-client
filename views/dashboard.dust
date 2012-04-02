@@ -14,8 +14,7 @@
   	<div class="container">
 	  	<div class="row">
 	  		<div class="span4 offset4 well" style="text-align:center;">
-	  			BOUNCING PIXEL<br />
-	  			{name}
+	  			{>"views/user.dust"/}
 	  		</div>
 	  	</div>
 			<div class="row">

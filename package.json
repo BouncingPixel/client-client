@@ -8,8 +8,9 @@
     "connect": "",
     "cloudfiles": "",
     "bcrypt": "",
-    "mime": "",
-    "debug": "",
+    "express": "https://github.com/visionmedia/express/tarball/master",
+    "dust": "https://github.com/linkedin/dustjs/tarball/master",
+    "consolidate": "https://github.com/fatjonny/consolidate.js/tarball/simpleDustTemplateSupport",
     "bunyan": "0.6.x"
   },
   "scripts": {

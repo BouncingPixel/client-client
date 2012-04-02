@@ -23,7 +23,7 @@
 			  		<input name="username" type="text" class="input-small" placeholder="username">
 			  		<input name="password" type="password" class="input-small" placeholder="password">
 			  		<button type="submit" class="btn">login</button>
-					</form>
+				</form>
 	  		</div>
 			</div>
 			<div class="row">

@@ -8,8 +8,8 @@
 (function () {
   "use strict";
 
-  var express = require('./express');
-  var consolidate = require('./consolidate');
+  var express = require('express');
+  var consolidate = require('consolidate');
   var async = require('async');
   var Logger = require('bunyan');
   var Users = require('./Users').Users;
