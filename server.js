@@ -112,7 +112,10 @@
     });
 
     cc.get( '/', function( req, res, next ) {
-      client.dashboard( req, res, next );
+      //client.dashboard( req, res, next );
+      var locals = { title:'dashboard',
+                     name:req.session.name };
+      res.render( 'dashboard', locals );
     });
 
     cc.get( '/dashboard', function( req, res, next ) {
