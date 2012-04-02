@@ -14,25 +14,20 @@
   	<div class="container">
 	  	<div class="row">
 	  		<div class="span4 offset4 well" style="text-align:center;">
-	  			{#invalid}
-	  				{.}{~n}
-	  			{:else}
-	  				&nbsp;
-	  			{/invalid}
-			  	<form class="form-inline" method="POST" action="checkPassword">
-			  		<input name="username" type="text" class="input-small" placeholder="username">
-			  		<input name="password" type="password" class="input-small" placeholder="password">
-			  		<button type="submit" class="btn">login</button>
+	  			BOUNCING PIXEL<br />
+	  			{name}
+	  		</div>
+	  	</div>
+			<div class="row">
+				<div class="hero-unit span5 offset3" style="text-align:center;">
+					<form class="form-inline" method="POST" action="changePassword">
+						<input name="username" type="hidden" value="{name}">
+			  		<input name="password" type="password" class="input" placeholder="new password"><br />
+			  		<input name="password2" type="password" class="input" placeholder="confirm password"><br />
+			  		<button type="submit" class="btn">change password</button>
 					</form>
 	  		</div>
 			</div>
-			<div class="row">
-				<div class="hero-unit span5 offset3">
-  				<h3>{heroTitle}</h3>
-  				<p>{heroDescription}</p>
-				</div>
-			</div>
-			<div class="row"></div>
 		</div>
   </body>
 </html>

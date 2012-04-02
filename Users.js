@@ -29,6 +29,7 @@ Users.prototype.checkPassword = function( req, res, next ) {
 			return req.session.regenerate( function( error ) {
 				req.session.invalid = null;
       	req.session.authenticated = true;
+      	req.session.name = user[0].name;
       	res.redirect( 'dashboard' );
     	});
     }
