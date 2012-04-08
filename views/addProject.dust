@@ -1,0 +1,4 @@
+<form class="form-inline" method="POST" action="addProject">
+	<input name="name" type="text" class="input" placeholder="project name"><br />
+	<button type="submit" class="btn">create project</button>
+</form>

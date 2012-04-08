@@ -18,14 +18,29 @@
 	  		</div>
 	  	</div>
 			<div class="row">
-				<div class="hero-unit span5 offset3" style="text-align:center;">
-					<form class="form-inline" method="POST" action="changePassword">
-						<input name="username" type="hidden" value="{name}">
-			  		<input name="password" type="password" class="input" placeholder="new password"><br />
-			  		<input name="password2" type="password" class="input" placeholder="confirm password"><br />
-			  		<button type="submit" class="btn">change password</button>
-					</form>
+				<div class="span6 offset3 well" style="text-align:center;">
+					{>"views/changePassword.dust"/}
 	  		</div>
+			</div>
+			<div class="row">
+				<div class="span6 offset3 well" style="text-align:center;">
+					{>"views/addUser.dust"/}
+				</div>
+			</div>
+			<div class="row">
+				<div class="span6 offset3 well" style="text-align:center;">
+					{>"views/addProject.dust"/}
+				</div>
+			</div>
+			<div class="row">
+				<div class="span6 offset3 well" style="text-align:center;">
+					{>"views/listUsers.dust"/}
+				</div>
+			</div>
+			<div class="row">
+				<div class="span6 offset3 well" style="text-align:center;">
+					{>"views/listProjects.dust"/}
+				</div>
 			</div>
 		</div>
   </body>

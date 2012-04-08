@@ -1,0 +1,9 @@
+{?projects}
+	<ul>
+		{#projects}
+			<li>{name}</li>
+		{/projects}
+	</ul>
+{:else}
+	No projects!
+{/users}

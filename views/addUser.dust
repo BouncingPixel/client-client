@@ -1,0 +1,5 @@
+<form class="form-inline" method="POST" action="addUser">
+	<input name="name" type="text" class="input" placeholder="name"><br />
+	<input name="password" type="password" class="input" placeholder="password"><br />
+	<button type="submit" class="btn">create user</button>
+</form>
