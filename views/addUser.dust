@@ -1,5 +1,8 @@
-<form class="form-inline" method="POST" action="addUser">
-	<input name="name" type="text" class="input" placeholder="name"><br />
+<form class="form-inline" method="POST" action="/addUser">
+	<input name="name" type="text" class="input" placeholder="name" autocomplete="off"><br />
 	<input name="password" type="password" class="input" placeholder="password"><br />
+	<input name="type" type="radio" class="input" value="admin" checked="checked">Admin 
+	<input name="type" type="radio" class="input" value="employee">Employee 
+	<input name="type" type="radio" class="input" value="client">Client<br/>
 	<button type="submit" class="btn">create user</button>
 </form>

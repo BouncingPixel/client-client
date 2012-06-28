@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+  	<title>Project :: {project.name}</title>
+  	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  	<link href="/css/bootstrap.css" rel="stylesheet">
+  	<link href="/css/bootstrap-responsive.css" rel="stylesheet">
+  	<!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+  	<!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <script type="text/javascript" src="/scripts/jquery-1.7.2.min.js"></script>
+    <script type="text/javascript" src="/scripts/project.js"></script>
+  </head>
+  <body>
+  	<div id="overlay" style="position:absolute;left:0px;right:0px;top:0px;bottom:0px;z-index:8001;display:none">
+  	  <div class="alert alert-info span5" style="position:absolute; z-index:9002;left:50%;margin-left:-235px;height:128px;top:50%;margin-top:-64px; box-shadow: 6px 6px 8px hsla(0, 0%, 0%, 0.2)">
+  		<button class="close" onclick="hide()">&times;</button>
+  	  	<h4>Settings</h4>
+  		<form method="POST" id="alert-form">
+  		  <span style="position:absolute; top:50%; margin-top:-18px; left:50%; margin-left:-145px">New name: <input class="input" type="text" name="name"></span><br />
+  		  <button class="btn" style="position:absolute; bottom:10px; left:50%; margin-left:-50px">Update name</button>
+  		</form>
+  	  </div>
+  	</div>
+  	<div class="container">
+  	  <div class="row">
+  		<div class="span4 offset4 well" style="text-align:center;">
+  		  {>"views/user.dust"/}
+  		</div>
+  	  </div>
+	  <div class="row">
+	  	<div class="span6 offset3 well" style="text-align:center;">
+		  Project<br />
+		  {#project auth=auth}
+		    {name}<br />
+		    {?users}
+		      <ul>
+			  	{#users uri=uri auth=auth}
+				  <li style="text-align:left">
+				  	<form method="POST" action="/projects/{uri}/removeUser">
+				  	  {.} 
+					  {?auth}
+				  	  	<input type="hidden" name="name" value="{.}">
+				  		<button type="submit" class="btn-mini" style="padding: 0px 0px 0px 0px"><i class="icon-remove"></i></button>
+					  {/auth}
+					</form>
+				  </li>
+				{/users}
+			  </ul>
+		    {:else}
+		      No users!
+		    {/users}
+		  {/project}
+		</div>
+	  </div>
+	  {?auth}
+	  	<div class="row">
+	      <div class="span6 offset3 well" style="text-align:center;">
+	      	{#project}
+	          {>"views/joinUser.dust"/}
+	        {/project}
+	      </div>
+	    </div>
+	  	<div class="row">
+	  	  <div class="span6 offset3 well" style="text-align:center;">
+	  		<form action="/projects/{project.uri}/enableSharing" method="POST">
+	  		  <input type="checkbox"
+	  		  {?project.sharingEnabled}
+	  			checked="checked" disabled="disabled"
+	  		  {:else}
+	  			onclick="disable( event );"
+	  		  {/project.sharingEnabled}
+	  		  id="canFileShare"> File Sharing
+	  		</form>
+	  		{?project.sharingEnabled}
+	  		  <form action="/projects/{project.uri}/upload" method="POST" enctype="multipart/form-data">
+	  		  	<input type="hidden" name="container" value="{project.container}">
+	  		  	<input type="hidden" name="hash" value="{project.hash}">
+	  			<input type="file" class="input" name="file" multiple="true">
+	  			<button type="submit" class="btn"><i class="icon-upload"></i></button>
+	  		  </form>
+	  		  {>"views/cloudFiles.dust"/}
+	  		{/project.sharingEnabled}
+	  	  </div>
+	  	</div>
+	  {/auth}
+	</div>
+  </body>
+</html>

@@ -2,15 +2,14 @@
   "name": "client-client",
   "version": "0.0.1",
   "dependencies": {
-    "mongodb": "",
-    "connect-mongodb": "",
+    "mongodb": "*",
+    "connect-mongodb": "*",
     "async": "0.1.x",
-    "connect": "",
-    "cloudfiles": "",
-    "bcrypt": "",
+    "cloudfiles": "*",
+    "bcrypt": "*",
     "express": "https://github.com/visionmedia/express/tarball/master",
-    "dust": "https://github.com/linkedin/dustjs/tarball/master",
-    "consolidate": "https://github.com/fatjonny/consolidate.js/tarball/simpleDustTemplateSupport",
+    "dustjs-linkedin": "*",
+    "consolidate": "*",
     "bunyan": "0.6.x"
   },
   "scripts": {

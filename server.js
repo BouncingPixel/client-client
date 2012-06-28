@@ -12,12 +12,16 @@
   var consolidate = require('consolidate');
   var async = require('async');
   var Logger = require('bunyan');
+  var Rackspace = require('./Rackspace').Rackspace;
   var Users = require('./Users').Users;
+  var Projects = require('./Projects').Projects;
 
   var configuration;
   var cc;
   var mongo;
+  var rackspace;
   var users;
+  var projects;
 
   var log = new Logger( {
     name:'client-client',
@@ -52,6 +56,13 @@
     });
   };
 
+  var startRackspace = function( callback ) {
+    log.info( "RACKSPACE: STARTING" );
+    rackspace = new Rackspace( configuration.rackInfo );
+    log.info( "RACKSPACE: SUCCESS");
+    callback();
+  };
+
   // set up the users manager
 
   var startUsers = function( callback ) {
@@ -60,6 +71,18 @@
       mongo:mongo
     });
     log.info( "USERS: SUCCESS" );
+    callback();
+  };
+
+  // set up the projects manager
+
+  var startProjects = function( callback ) {
+    log.info( "PROJECTS: STARTING" );
+    projects = new Projects( {
+      mongo:mongo,
+      rackspace:rackspace
+    });
+    log.info( "PROJECTS: SUCCESS" );
     callback();
   };
 
@@ -73,9 +96,10 @@
       cc.configure( function() {
         cc.set( 'view engine', 'dust' );
         cc.use( express.cookieParser( "rawr" ) );
-        cc.use( express.session( { cookie: { maxAge: 60000 } } ) );
+        cc.use( express.session( { cookie: { maxAge: 3600000 } } ) );
         cc.use( express.static( __dirname + '/static' ) );
-        cc.use( express.bodyParser() );
+        cc.use( express.json() );
+        cc.use( express.urlencoded() );
         cc.use( cc.router );
       });
     }
@@ -107,24 +131,109 @@
       users.checkPassword( req, res, next );
     });
 
-    cc.get( '*', function( req, res, next ) {
+    cc.all( '*', function( req, res, next ) {
       users.authenticate( req, res, next );
     });
 
     cc.get( '/', function( req, res, next ) {
-      //client.dashboard( req, res, next );
-      var locals = { title:'dashboard',
-                     name:req.session.name };
-      res.render( 'dashboard', locals );
+      users.getAllUsers(function( err, users ) {
+        projects.getAllProjects(function( err, projects ) {
+          var auth = req.session.type==="admin";
+          var perm = auth||req.session.type==="employee";
+          var locals = { title:'dashboard',
+                         name:req.session.name,
+                         auth:auth,
+                         perm:perm,
+                         users:users || [],
+                         projects:projects || [] };
+          res.render( 'dashboard', locals );
+        });
+      });
     });
 
     cc.get( '/dashboard', function( req, res, next ) {
-      //client.dashboard( req, res, next );
-      var locals = { title:'dashboard',
-                     name:req.session.name };
-      res.render( 'dashboard', locals );
+      users.getAllUsers(function( err, users ) {
+        projects.getAllProjects(function( err, projects ) {
+          var auth = req.session.type==="admin";
+          var perm = auth||req.session.type==="employee";
+          var locals = { title:'dashboard',
+                         name:req.session.name,
+                         auth:auth,
+                         perm:perm,
+                         users:users || [],
+                         projects:projects || [] };
+          res.render( 'dashboard', locals );
+        });
+      });
     });
 
+    cc.post( '/addUser', function( req, res, next ) {
+      users.addUser( req, res, next );
+    });
+
+    cc.post( '/addProject', function( req, res, next ) {
+      projects.addProject( req, res, next );
+    });
+
+    cc.get( '/projects/:uri', function( req, res, next ) {
+      users.getAllClients( function( err, clients ) {
+        projects.find( req.params.uri, function( err, project ) {
+          if( project && project[0] ) {
+            projects.getFiles( project[0], function( err, files ) {
+              var auth = req.session.type==="admin";
+              var perm = auth||req.session.type==="employee";
+              var bcrypt = require( 'bcrypt' );
+              var salt = bcrypt.genSaltSync(10);
+              var hash = bcrypt.hashSync(project[0].container, salt);
+              clients = clients.filter( function( val ) {
+                return project[0].users.indexOf(val.name)<0;
+              });
+              var locals = { project: { name: project[0].name,
+                                        users: project[0].users || [],
+                                        uri: project[0].uri,
+                                        sharingEnabled: project[0].sharingEnabled,
+                                        container: project[0].container,
+                                        hash: hash
+                                      },
+                             name:req.session.name,
+                             auth:auth,
+                             perm:perm,
+                             clients:clients,
+                             files:files };
+              res.render( 'project', locals );
+            });
+          } else {
+            res.send(404, '');
+          }
+        });
+      });
+    });
+
+    cc.post( '/projects/:uri/addUser', function( req, res, next ) {
+      projects.addUser( req, res, next );
+    });
+
+    cc.post( '/projects/:uri/removeUser', function( req, res, next ) {
+      projects.removeUser( req, res, next );
+    });
+
+    cc.post( '/projects/:uri/enableSharing', function( req, res, next ) {
+      projects.enableSharing( req, res, next );
+    });
+
+    cc.post( '/projects/:uri/upload', function( req, res, next ) {
+      console.log('entering route');
+      projects.uploadFile( req, res, next );
+    });
+
+    cc.get( '/projects/:uri/downloads/:file', function( req, res, next ) {
+      projects.streamFile( req, res, next );
+    });
+
+    cc.get( '/projects/:uri/remove/:file', function( req, res, next ) {
+      projects.removeFile( req, res, next );
+    });
+    
     log.info( "ROUTES: SUCCESS" );
     callback();
   };
@@ -143,8 +252,10 @@
   async.series( [
                   startConfiguration,
                   startDatabase,
-                  startExpressConfiguration,
+                  startRackspace,
                   startUsers,
+                  startProjects,
+                  startExpressConfiguration,
                   startExpressRoutes,
                   startExpressListen
     ],

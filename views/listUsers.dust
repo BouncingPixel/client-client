@@ -1,7 +1,8 @@
 {?users}
+	Users
 	<ul>
 		{#users}
-			<li>{name} :: {project}</li>
+			<li style="text-align:left">{name} :: {type}</li>
 		{/users}
 	</ul>
 {:else}

@@ -1,9 +1,10 @@
 {?projects}
+	Projects
 	<ul>
 		{#projects}
-			<li>{name}</li>
+			<li style="text-align:left"><a href="/projects/{uri}">{name}</a></li>
 		{/projects}
 	</ul>
 {:else}
 	No projects!
-{/users}
+{/projects}
