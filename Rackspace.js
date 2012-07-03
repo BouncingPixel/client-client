@@ -52,7 +52,7 @@ Rackspace.prototype.saveStream = function( containerName, imageName, stream, cal
     if( err ) { return callback( err ); }
     _self.client.addFile( containerName, 
         { remote:imageName, stream:stream, headers: stream.headers }, 
-        callback ); 
+        callback );
   });
 };
 

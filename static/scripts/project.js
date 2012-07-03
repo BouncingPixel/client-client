@@ -44,9 +44,10 @@ var sendReq = function(e) {
 	params = params.substr(0,params.length-1);
 	xmlhttp.open(form.method, form.action, true);
 	xmlhttp.setRequestHeader("content-type", "application/x-www-form-urlencoded");
-	xmlhttp.upload.onprogress = function() {
-		console.log("status received");
-		bar.style.width = "50%";
+	xmlhttp.upload.onprogress = function(event) {
+		if (event.lengthComputable) {
+			bar.style.width = Math.round(event.loaded * 100 / event.total)+"%";
+		}
 	};
 	xmlhttp.onload = function() {
 		bar.style.width = "100%";
@@ -61,5 +62,38 @@ var sendReq = function(e) {
 		document.body.style.overflow = "auto";
 	};
 	xmlhttp.send(params);
+	return false;
+};
+
+var upload = function(e) {
+	if(e.cancelable) {
+		e.preventDefault();
+		e.target.display = "none";
+	}
+	var form = document.getElementById("file-upload-form"),
+		fd = new FormData(form),
+		elems = form.elements,
+		input = form.file,
+		progress = document.getElementById("upload-progress"),
+		bar = document.getElementById("upload-bar"),
+		xmlhttp = new XMLHttpRequest();
+	progress.style.width = input.style.width;
+	input.style.display = "none";
+	progress.style.display = "block";
+	xmlhttp.upload.onprogress = function (event) {
+		if (event.lengthComputable) {
+			bar.style.width = Math.round(event.loaded * 100 / event.total)+"%";
+		}
+	};
+	xmlhttp.onload = function () {
+		bar.style.width = "100%";
+	};
+	xmlhttp.onerror = function () {
+		$(progress).addClass("progress-danger");
+		$(progress).removeClass("progress-striped");
+		e.target.display = "block";
+	};
+	xmlhttp.open(form.method, form.action, true);
+	xmlhttp.send(fd);
 	return false;
 };

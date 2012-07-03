@@ -103,7 +103,13 @@ Projects.prototype.uploadFile = function( req, res, next ) {
       data = {},
       container,
       hash,
-      verified = false;
+      verified = false,
+      sent = 0;
+  form.on("progress", function (received, expected) {
+    console.log(received);
+    console.log(expected);
+    console.log("---------");
+  });
   form.onPart = function(part) {
     if(!part.filename) {
       form.handlePart(part);
@@ -114,7 +120,7 @@ Projects.prototype.uploadFile = function( req, res, next ) {
       var name = part.filename.replace(/\.[^\.]*/g,""),
           ext = part.filename.replace(/[^\.]*/,""),
           file = escape(name)+ext;
-      part.headers["content-disposition"] = 'form-data; name="'+name+'"; filename="'+file+'"';
+      part.headers["content-disposition"] = 'form-data; name="'+file+'"; filename="'+file+'"';
       self._rackspace.saveStream( data.container, escape(file), part, function( err, success ) {
         if (err) {
           console.log( err );
@@ -125,7 +131,7 @@ Projects.prototype.uploadFile = function( req, res, next ) {
     }
   };
   form._maybeEnd = function() {
-    if (!this.ended || this._flushing || pending > 0) {
+    if (!this.ended || this._flushing || this.pending > 0) {
       return;
     }
     form.emit('end');
@@ -232,7 +238,7 @@ Projects.prototype.updateFile = function( req, res, next ) {
         newFile = escape(newName)+ext,
         file = req.params.file,
         headers = {
-          'content-disposition': 'form-data; name="'+newName+'"; filename="'+newFile+'"',
+          'content-disposition': 'form-data; name="'+newFile+'"; filename="'+newFile+'"',
           'destination': '/'+container+'/'+escape(newFile)
         };
     if (newFile === file) {

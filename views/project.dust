@@ -82,11 +82,14 @@
 	  		  id="canFileShare"> File Sharing
 	  		</form>
 	  		{?project.sharingEnabled}
-	  		  <form action="/projects/{project.uri}/upload" method="POST" enctype="multipart/form-data">
+	  		  <form action="/projects/{project.uri}/upload" method="POST" enctype="multipart/form-data" id="file-upload-form" name="file-upload-form">
 	  		  	<input type="hidden" name="container" value="{project.container}">
 	  		  	<input type="hidden" name="hash" value="{project.hash}">
+	  		  	<div class="progress progress-striped active" style="display:none" id="upload-progress">
+	  		  		<div class="bar" style="width:0%" id="upload-bar"></div>
+	  		  	</div>
 	  			<input type="file" class="input" name="file" multiple="true">
-	  			<button type="submit" class="btn"><i class="icon-upload"></i></button>
+	  			<button class="btn" onclick="upload(event);"><i class="icon-upload"></i></button>
 	  		  </form>
 	  		  {>"views/cloudFiles.dust"/}
 	  		{/project.sharingEnabled}
