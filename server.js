@@ -176,10 +176,11 @@
     });
 
     cc.get( '/projects/:uri', function( req, res, next ) {
-      users.getAllClients( function( err, clients ) {
-        projects.find( req.params.uri, function( err, project ) {
-          if( project && project[0] ) {
-            projects.getFiles( project[0], function( err, files ) {
+      var clients,
+          project,
+          files,
+          maybeEnd = function () {
+            if(typeof clients !== "undefined" && typeof project !== "undefined" && typeof files !== "undefined") {
               var auth = req.session.type==="admin";
               var perm = auth||req.session.type==="employee";
               var bcrypt = require( 'bcrypt' );
@@ -201,12 +202,42 @@
                              clients:clients,
                              files:files };
               res.render( 'project', locals );
+            }
+          };
+      async.parallel([
+        function () {
+          users.getAllClients( function( err, array ) {
+            if(err) {
+              error = err;
+              console.log(err);
+              return res.send(500);
+            }
+            clients = array;
+            maybeEnd();
+          });
+        }, function () {
+          projects.find( req.params.uri, function( err, obj ) {
+            if(err) {
+              error = err;
+              console.log(err);
+              return res.send(500);
+            }
+            project = obj;
+            projects.getFiles( project[0], function( err, array ) {
+              if(err) {
+                console.log(err);
+                return res.send(500);
+              }
+              files = array;
+              maybeEnd();
             });
-          } else {
-            res.send(404, '');
+          });
+        }], function (err) {
+          if(err) {
+            console.log(err);
+            return res.send(500);
           }
         });
-      });
     });
 
     cc.post( '/projects/:uri/addUser', function( req, res, next ) {
@@ -222,7 +253,6 @@
     });
 
     cc.post( '/projects/:uri/upload', function( req, res, next ) {
-      console.log('entering route');
       projects.uploadFile( req, res, next );
     });
 
@@ -232,6 +262,10 @@
 
     cc.get( '/projects/:uri/remove/:file', function( req, res, next ) {
       projects.removeFile( req, res, next );
+    });
+
+    cc.post( '/projects/:uri/update/:file', function( req, res, next ) {
+      projects.updateFile( req, res, next );
     });
     
     log.info( "ROUTES: SUCCESS" );

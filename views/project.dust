@@ -13,13 +13,21 @@
     <script type="text/javascript" src="/scripts/project.js"></script>
   </head>
   <body>
-  	<div id="overlay" style="position:absolute;left:0px;right:0px;top:0px;bottom:0px;z-index:8001;display:none">
-  	  <div class="alert alert-info span5" style="position:absolute; z-index:9002;left:50%;margin-left:-235px;height:128px;top:50%;margin-top:-64px; box-shadow: 6px 6px 8px hsla(0, 0%, 0%, 0.2)">
+  	<div id="overlay" style="position:absolute;left:0px;right:0px;top:0px;bottom:0px;z-index:8001;display:none;background-color:hsla(0,100%,100%,0.6)">
+  	  <div class="alert alert-info span5" style="position:absolute;z-index:9001;left:50%;margin-left:-235px;height:128px;top:50%;margin-top:-64px;box-shadow: 6px 6px 8px hsla(0, 0%, 0%, 0.2)">
   		<button class="close" onclick="hide()">&times;</button>
-  	  	<h4>Settings</h4>
+  	  	<h4>Settings :: <span id="alert-name"></span></h4>
   		<form method="POST" id="alert-form">
-  		  <span style="position:absolute; top:50%; margin-top:-18px; left:50%; margin-left:-145px">New name: <input class="input" type="text" name="name"></span><br />
-  		  <button class="btn" style="position:absolute; bottom:10px; left:50%; margin-left:-50px">Update name</button>
+  		  <input type="hidden" name="container" value="{project.container}">
+	  	  <input type="hidden" name="hash" value="{project.hash}">
+	  	  <div style="display:none;position:absolute;top:50%;margin-top:-9px;left:50%;margin-left:-150px;width:300px" class="progress progress-striped active" id="alert-progress">
+	  	  	<div class="bar" style="width:0%;z-index:9001;border-radius:4px;-moz-border-radius:4px;-webkit-border-radius:4px" id="alert-bar"></div>
+	  	  </div>
+  		  <span style="position:absolute;top:50%;margin-top:-18px;left:50%;margin-left:-145px" id="alert-input">
+  		  	New name: <input class="input" type="text" name="name" autocomplete="off">
+  		  </span>
+  		  <br />
+  		  <button class="btn" style="position:absolute;bottom:10px;left:50%;margin-left:-50px" onclick="sendReq(event)">Update name</button>
   		</form>
   	  </div>
   	</div>

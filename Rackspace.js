@@ -43,7 +43,7 @@ Rackspace.prototype.saveFile = function( containerName, imageName, path, callbac
       return callback( err ); 
     }
     _self.client.addFile( containerName, { remote:imageName, local:path }, callback );
-  })
+  });
 };
 
 //
@@ -63,6 +63,13 @@ Rackspace.prototype.get = function( containerName, imageName, callback ) {
     _self.client.getFile( containerName, imageName, callback );
   });
 };
+
+Rackspace.prototype.updateFile = function( containerName, imageName, headers, callback ) {
+  init( function ( err ) {
+    if( err ) { return callback( err ); }
+    _self.client.updateFile( containerName, { remote:imageName, headers: headers }, callback );
+  });
+}
 
 //
 Rackspace.prototype.getStream = function( containerName, imageName, stream, callback ) {

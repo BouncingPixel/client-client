@@ -2,7 +2,7 @@
   {#files uri=project.uri}
     <div class="well" style="width:60%;margin-left:auto;margin-right:auto;background-color:hsl(0, 0%, 99%)">
       <div class="btn-group" style="float:right;margin-top:-18px;margin-right:-18px">
-        <button class="btn" onclick="settings('/projects/{uri}/update/{.name}')"><i class="icon-wrench"></i></button>
+        <button class="btn" onclick="settings('/projects/{uri}/update/{.name}', '{.name}')"><i class="icon-wrench"></i></button>
         <a class="btn" href="/projects/{uri}/downloads/{.name}"><i class="icon-download"></i></a>
         <a class="btn" href="/projects/{uri}/remove/{.name}"><i class="icon-trash"></i></a>
       </div>

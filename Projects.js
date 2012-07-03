@@ -110,16 +110,16 @@ Projects.prototype.uploadFile = function( req, res, next ) {
       return;
     }
     if (verified) {
-      console.log("initializing stream");
-      console.log( "container: "+data.container );
       pending++;
-      part.headers["content-disposition"] = 'form-data; name="'+part.filename.replace(/\.[a-zA-Z\d]*/,"")+'"; filename="'+part.filename+'"';
-      self._rackspace.saveStream( data.container, part.filename, part, function( err, success ) {
+      var name = part.filename.replace(/\.[^\.]*/g,""),
+          ext = part.filename.replace(/[^\.]*/,""),
+          file = escape(name)+ext;
+      part.headers["content-disposition"] = 'form-data; name="'+name+'"; filename="'+file+'"';
+      self._rackspace.saveStream( data.container, escape(file), part, function( err, success ) {
         if (err) {
           console.log( err );
         }
         pending--;
-        console.log('stream closed');
         form._maybeEnd();
       });
     }
@@ -141,7 +141,6 @@ Projects.prototype.uploadFile = function( req, res, next ) {
     if(typeof container === "string" && typeof hash === "string") {
       var bcrypt = require( 'bcrypt' );
       verified = bcrypt.compareSync(container, hash);
-      console.log("verified");
     }
   });
   form.on('error', function(err) {
@@ -171,9 +170,10 @@ Projects.prototype.getFiles = function( project, callback ) {
           props:Object.getOwnPropertyNames( file ).filter(function( prop ) {
             return typeof file[prop] === "string" && file[prop];
           }).map( function( prop ) {
+            if(prop === "name") return { prop:prop, val:unescape(file[prop]) };
             return { prop:prop, val:file[prop] };
           }),
-          name:file.name
+          name: file.name
         };
       }) );
     } else {
@@ -185,8 +185,8 @@ Projects.prototype.getFiles = function( project, callback ) {
 Projects.prototype.streamFile = function( req, res, next ) {
   var self = this;
   self.find( req.params.uri, function( err, project ) {
-    if (project && project[0] ) {
-      self._rackspace.getStream( project[0].container, req.params.file, res, function( err, obj ) {
+    if ( project && project[0] ) {
+      self._rackspace.getStream( project[0].container, escape(escape(req.params.file)), res, function( err, obj ) {
         if (err) {
           console.log( err );
         }
@@ -204,7 +204,7 @@ Projects.prototype.removeFile = function( req, res, next ) {
   var self = this;
   self.find( req.params.uri, function( err, project ) {
     if (project && project[0] ) {
-      self._rackspace.remove( project[0].container, req.params.file, function( err, success ) {
+      self._rackspace.remove( project[0].container, escape(escape(req.params.file)), function( err, success ) {
         if (err) {
           console.log(err);
         }
@@ -217,4 +217,41 @@ Projects.prototype.removeFile = function( req, res, next ) {
       res.redirect( '/projects/'+req.params.uri );
     }
   });
+};
+
+Projects.prototype.updateFile = function( req, res, next ) {
+  var self = this,
+      container = req.param( 'container' ),
+      hash = req.param( 'hash' ),
+      bcrypt = require( 'bcrypt' ),
+      verified = bcrypt.compareSync(container, hash);
+  if ( verified ) {
+    var newName = req.param( 'name' ).replace(/\.[^\.]*/g,""),
+        name = req.params.file.replace(/\.[^\.]*/g,""),
+        ext = req.params.file.replace(/[^\.]*/,""),
+        newFile = escape(newName)+ext,
+        file = req.params.file,
+        headers = {
+          'content-disposition': 'form-data; name="'+newName+'"; filename="'+newFile+'"',
+          'destination': '/'+container+'/'+escape(newFile)
+        };
+    if (newFile === file) {
+      res.send(200);
+      return;
+    }
+    self._rackspace.updateFile( container, escape(escape(file)), headers, function (err, success) {
+      if (err) {
+        console.log(err);
+      }
+      res.writeContinue();
+      self._rackspace.remove( container, escape(escape(file)), function( err, success ) {
+        if (err) {
+          console.log(err);
+        }
+        res.send(200);
+      });
+    });
+  } else {
+    res.send(409);
+  }
 };
