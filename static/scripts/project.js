@@ -1,3 +1,8 @@
+var socket = io.connect();
+$(function() {
+	socket.send(document.forms["file-upload-form"].hash.value)
+})
+
 var disable = function(e) {
 	var self = document.getElementById( 'canFileShare' );
 	if( self.checked ) {
@@ -68,30 +73,38 @@ var sendReq = function(e) {
 var upload = function(e) {
 	if(e.cancelable) {
 		e.preventDefault();
-		e.target.display = "none";
 	}
 	var form = document.getElementById("file-upload-form"),
 		fd = new FormData(form),
 		elems = form.elements,
 		input = form.file,
-		progress = document.getElementById("upload-progress"),
+		progress = document.getElementById("progress-bars"),
 		bar = document.getElementById("upload-bar"),
+		bar2 = document.getElementById("send-bar"),
+		button = document.getElementById("upload-btn"),
 		xmlhttp = new XMLHttpRequest();
 	progress.style.width = input.style.width;
+	button.style.display = "none";
 	input.style.display = "none";
 	progress.style.display = "block";
-	xmlhttp.upload.onprogress = function (event) {
-		if (event.lengthComputable) {
-			bar.style.width = Math.round(event.loaded * 100 / event.total)+"%";
+	socket.on("upload", function (widthStr) {
+		bar.style.width = widthStr;
+	});
+	socket.on("send", function (widthStr) {
+		bar2.style.width = widthStr;
+	});
+	socket.on("done", function () {
+		location.reload(true);
+	});
+	xmlhttp.onload = function (event) {
+		if(event.cancelable) {
+			event.preventDefault();
 		}
-	};
-	xmlhttp.onload = function () {
-		bar.style.width = "100%";
 	};
 	xmlhttp.onerror = function () {
 		$(progress).addClass("progress-danger");
 		$(progress).removeClass("progress-striped");
-		e.target.display = "block";
+		button.style.display = "inline-block";
 	};
 	xmlhttp.open(form.method, form.action, true);
 	xmlhttp.send(fd);

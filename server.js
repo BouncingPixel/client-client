@@ -12,12 +12,15 @@
   var consolidate = require('consolidate');
   var async = require('async');
   var Logger = require('bunyan');
+  var sio = require("socket.io");
   var Rackspace = require('./Rackspace').Rackspace;
   var Users = require('./Users').Users;
   var Projects = require('./Projects').Projects;
 
   var configuration;
   var cc;
+  var http;
+  var io;
   var mongo;
   var rackspace;
   var users;
@@ -80,9 +83,24 @@
     log.info( "PROJECTS: STARTING" );
     projects = new Projects( {
       mongo:mongo,
-      rackspace:rackspace
+      rackspace:rackspace,
+      io:io
     });
     log.info( "PROJECTS: SUCCESS" );
+    callback();
+  };
+
+  // set up socket.io
+
+  var startSocketIO = function( callback ) {
+    log.info( "IO: STARTING" );
+    try {
+      io = sio.listen( http ).set("log level", 1);
+    }
+    catch( error ) {
+      return callback( error );
+    }
+    log.info( "IO: SUCCESS" );
     callback();
   };
 
@@ -92,6 +110,7 @@
     log.info( "EXPRESS: STARTING" );
     try {
       cc = express();
+      http = require("http").createServer(cc);
       cc.engine('dust', consolidate.dust );
       cc.configure( function() {
         cc.set( 'view engine', 'dust' );
@@ -136,35 +155,93 @@
     });
 
     cc.get( '/', function( req, res, next ) {
-      users.getAllUsers(function( err, users ) {
-        projects.getAllProjects(function( err, projects ) {
-          var auth = req.session.type==="admin";
-          var perm = auth||req.session.type==="employee";
-          var locals = { title:'dashboard',
-                         name:req.session.name,
-                         auth:auth,
-                         perm:perm,
-                         users:users || [],
-                         projects:projects || [] };
-          res.render( 'dashboard', locals );
+      var _users,
+          _projects,
+          maybeEnd = function () {
+            if(typeof _users !== "undefined" && typeof _projects !== "undefined") {
+              var auth = req.session.type==="admin";
+              var perm = auth||req.session.type==="employee";
+              var locals = { title:'dashboard',
+                             name:req.session.name,
+                             auth:auth,
+                             perm:perm,
+                             users:_users || [],
+                             projects:_projects || [] };
+              res.render( 'dashboard', locals );
+            }
+          };
+      async.parallel([
+        function () {
+          users.getAllUsers(function( err, array ) {
+            if(err) {
+              console.log(err);
+              res.send(500);
+            } else {
+              _users = array;
+              maybeEnd();
+            }
+          });
+        }, function () {
+          projects.getAllProjects(function( err, array ) {
+            if(err) {
+              console.log(err);
+              res.send(500);
+            } else {
+              _projects = array;
+              maybeEnd();
+            }
+          });
+        }], function (err) {
+          if(err) {
+            console.log(err);
+            res.send(500);
+          }
         });
-      });
     });
 
     cc.get( '/dashboard', function( req, res, next ) {
-      users.getAllUsers(function( err, users ) {
-        projects.getAllProjects(function( err, projects ) {
-          var auth = req.session.type==="admin";
-          var perm = auth||req.session.type==="employee";
-          var locals = { title:'dashboard',
-                         name:req.session.name,
-                         auth:auth,
-                         perm:perm,
-                         users:users || [],
-                         projects:projects || [] };
-          res.render( 'dashboard', locals );
+      var _users,
+          _projects,
+          maybeEnd = function () {
+            if(typeof _users !== "undefined" && typeof _projects !== "undefined") {
+              var auth = req.session.type==="admin";
+              var perm = auth||req.session.type==="employee";
+              var locals = { title:'dashboard',
+                             name:req.session.name,
+                             auth:auth,
+                             perm:perm,
+                             users:_users || [],
+                             projects:_projects || [] };
+              res.render( 'dashboard', locals );
+            }
+          };
+      async.parallel([
+        function () {
+          users.getAllUsers(function( err, array ) {
+            if(err) {
+              console.log(err);
+              res.send(500);
+            } else {
+              _users = array;
+              maybeEnd();
+            }
+          });
+        }, function () {
+          projects.getAllProjects(function( err, array ) {
+            if(err) {
+              console.log(err);
+              res.send(500);
+            } else {
+              _projects = array;
+              maybeEnd();
+            }
+          });
+        }], function (err) {
+          if(err) {
+            console.log(err);
+            res.send(500);
+          }
         });
-      });
     });
 
     cc.post( '/addUser', function( req, res, next ) {
@@ -208,7 +285,6 @@
         function () {
           users.getAllClients( function( err, array ) {
             if(err) {
-              error = err;
               console.log(err);
               return res.send(500);
             }
@@ -218,7 +294,6 @@
         }, function () {
           projects.find( req.params.uri, function( err, obj ) {
             if(err) {
-              error = err;
               console.log(err);
               return res.send(500);
             }
@@ -276,7 +351,7 @@
 
   var startExpressListen = function( callback ) {
     log.info( "LISTENING: STARTING" );
-    cc.listen( configuration.port );
+    http.listen( configuration.port );
     log.info( "LISTENING: SUCCESS" );
     callback();
   };
@@ -288,8 +363,9 @@
                   startDatabase,
                   startRackspace,
                   startUsers,
-                  startProjects,
                   startExpressConfiguration,
+                  startSocketIO,
+                  startProjects,
                   startExpressRoutes,
                   startExpressListen
     ],

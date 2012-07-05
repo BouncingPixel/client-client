@@ -9,6 +9,7 @@
   	<!--[if lt IE 9]>
       <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
+    <script type="text/javascript" src="/socket.io/socket.io.js"></script>
     <script type="text/javascript" src="/scripts/jquery-1.7.2.min.js"></script>
     <script type="text/javascript" src="/scripts/project.js"></script>
   </head>
@@ -85,11 +86,18 @@
 	  		  <form action="/projects/{project.uri}/upload" method="POST" enctype="multipart/form-data" id="file-upload-form" name="file-upload-form">
 	  		  	<input type="hidden" name="container" value="{project.container}">
 	  		  	<input type="hidden" name="hash" value="{project.hash}">
-	  		  	<div class="progress progress-striped active" style="display:none" id="upload-progress">
-	  		  		<div class="bar" style="width:0%" id="upload-bar"></div>
-	  		  	</div>
+	  		  	<div id="progress-bars" style="display:none">
+	  		  		Upload Progress:
+		  		  	<div class="progress progress-striped progress-info active" id="upload-progress">
+		  		  		<div class="bar" style="width:0%" id="upload-bar"></div>
+		  		  	</div>
+		  		  	Send Progress:
+		  		  	<div class="progress progress-striped progress-success active" id="send-progress">
+		  		  		<div class="bar" style="width:0%" id="send-bar"></div>
+		  		  	</div>
+		  		</div>
 	  			<input type="file" class="input" name="file" multiple="true">
-	  			<button class="btn" onclick="upload(event);"><i class="icon-upload"></i></button>
+	  			<button class="btn" onclick="upload(event);" id="upload-btn"><i class="icon-upload"></i></button>
 	  		  </form>
 	  		  {>"views/cloudFiles.dust"/}
 	  		{/project.sharingEnabled}

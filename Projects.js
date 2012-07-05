@@ -1,19 +1,14 @@
 var IncomingForm = require('formidable').IncomingForm;
 var qs = require('qs');
 
+// sockets will be stored according to hash values on project pages
+
+var io;
+var sockets = {};
+
 function sanitize( str ) {
   if(str && typeof str === "string") return str.replace( /[^a-zA-Z\d_\-]/g, '' );
   return "";
-}
-
-function ondata(name, val, data){
-  if (Array.isArray(data[name])) {
-    data[name].push(val);
-  } else if (data[name]) {
-    data[name] = [data[name], val];
-  } else {
-    data[name] = val;
-  }
 }
 
 var Projects = exports.Projects = function( spec ) {
@@ -22,6 +17,19 @@ var Projects = exports.Projects = function( spec ) {
 
   this._projects = this._mongo.getCollection( 'projects' );
   this._rackspace = spec.rackspace;
+  io = spec.io;
+  io.sockets.on("connection", function (socket) {
+    var hash;
+    socket.on("message", function (str) {
+      hash = str;
+      sockets[hash] = socket;
+    });
+    socket.on("disconnect", function () {
+      if (typeof hash === "string") {
+        delete sockets[hash];
+      }
+    });
+  });
 };
 
 Projects.prototype.addProject = function( req, res, next ) {
@@ -98,17 +106,15 @@ Projects.prototype.enableSharing = function( req, res, next ) {
 Projects.prototype.uploadFile = function( req, res, next ) {
   var self = this,
       form = new IncomingForm,
-      pending = 0,
       done = false,
-      data = {},
       container,
       hash,
       verified = false,
-      sent = 0;
+      pending = 0,
+      sent = 0,
+      socket;
   form.on("progress", function (received, expected) {
-    console.log(received);
-    console.log(expected);
-    console.log("---------");
+    total = expected;
   });
   form.onPart = function(part) {
     if(!part.filename) {
@@ -116,33 +122,42 @@ Projects.prototype.uploadFile = function( req, res, next ) {
       return;
     }
     if (verified) {
-      pending++;
       var name = part.filename.replace(/\.[^\.]*/g,""),
           ext = part.filename.replace(/[^\.]*/,""),
           file = escape(name)+ext;
+      pending++;
       part.headers["content-disposition"] = 'form-data; name="'+file+'"; filename="'+file+'"';
-      self._rackspace.saveStream( data.container, escape(file), part, function( err, success ) {
+      self._rackspace.saveStream( container, escape(file), part, function( err, success ) {
         if (err) {
           console.log( err );
         }
-        pending--;
-        form._maybeEnd();
+        sent++;
+        socket.emit("send", Math.round(sent * 100 / pending)+"%");
+        if(pending === sent) {
+          socket.emit("done");
+          delete sockets[hash];
+        }
       });
     }
   };
-  form._maybeEnd = function() {
-    if (!this.ended || this._flushing || this.pending > 0) {
-      return;
-    }
-    form.emit('end');
-  };
   form.on('field', function(name, val) {
-    ondata(name, val, data);
-    if(name === "container") {
-      container = val;
-    }
-    if(name === "hash") {
-      hash = val;
+    switch (name) {
+      case "container":
+        container = val;
+        break;
+      case "hash":
+        hash = val;
+        socket = sockets[hash];
+        form.on('progress', function(received, expected) {
+          var percent = Math.round(received * 100 / expected)+"%";
+          socket.emit("upload", percent);
+        });
+        break;
+      default:
+        var obj = {};
+        obj[name] = val;
+        console.log(obj);
+        break;
     }
     if(typeof container === "string" && typeof hash === "string") {
       var bcrypt = require( 'bcrypt' );
@@ -155,12 +170,7 @@ Projects.prototype.uploadFile = function( req, res, next ) {
   });
   form.on('end', function() {
     if(done) return;
-    try {
-      req.body = qs.parse(data);
-    } catch(err) {
-      console.log(err);
-    }
-    res.redirect( '/projects/'+req.params.uri );
+    res.send(200);
   });
   form.parse(req);
 };
@@ -174,10 +184,37 @@ Projects.prototype.getFiles = function( project, callback ) {
       callback( null, files.map( function( file ) {
         return {
           props:Object.getOwnPropertyNames( file ).filter(function( prop ) {
-            return typeof file[prop] === "string" && file[prop];
+            switch(prop) {
+              case "name":
+              case "contentType":
+              case "container":
+              case "bytes":
+                return true;
+              default:
+                return false;
+            }
           }).map( function( prop ) {
-            if(prop === "name") return { prop:prop, val:unescape(file[prop]) };
-            return { prop:prop, val:file[prop] };
+            switch(prop) {
+              case "name":
+                return { prop:"Name", val:unescape(file[prop]) };
+              case "contentType":
+                return { prop: "Content-Type", val:file[prop] };
+              case "container":
+                return { prop: "Container", val:file[prop] };
+              case "bytes":
+                var bytes = file[prop];
+                if(bytes < 1024) {
+                  return { prop:"Bytes", val:bytes };
+                } else if(bytes < 1024*1024) {
+                  return { prop: "Kilobytes", val:(bytes/1024).toFixed(1) };
+                } else if(bytes < 1024*1024*1024) {
+                  return { prop: "Megabytes", val:(bytes/(1024*1024)).toFixed(1) };
+                } else if(bytes < 1024*1024*1024*1024) {
+                  return { prop: "Gigabytes", val:(bytes/(1024*1024*1024)).toFixed(1) };
+                } else {
+                  return { prop: "Terabytes", val:(bytes/(1024*1024*1024*1024)).toFixed(1) };
+                }
+            }
           }),
           name: file.name
         };
@@ -201,7 +238,7 @@ Projects.prototype.streamFile = function( req, res, next ) {
       if(err) {
         console.log(err);
       }
-      res.send(404, '');
+      res.send(500, '');
     }
   });
 };
