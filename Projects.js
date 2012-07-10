@@ -122,9 +122,7 @@ Projects.prototype.uploadFile = function( req, res, next ) {
       return;
     }
     if (verified) {
-      var name = part.filename.replace(/\.[^\.]*/g,""),
-          ext = part.filename.replace(/[^\.]*/,""),
-          file = escape(name)+ext;
+      var file = escape(part.filename);
       pending++;
       part.headers["content-disposition"] = 'form-data; name="'+file+'"; filename="'+file+'"';
       self._rackspace.saveStream( container, escape(file), part, function( err, success ) {
@@ -171,6 +169,9 @@ Projects.prototype.uploadFile = function( req, res, next ) {
   form.on('end', function() {
     if(done) return;
     res.send(200);
+    if(pending === 0) {
+      socket.emit("done");
+    }
   });
   form.parse(req);
 };
@@ -269,11 +270,9 @@ Projects.prototype.updateFile = function( req, res, next ) {
       bcrypt = require( 'bcrypt' ),
       verified = bcrypt.compareSync(container, hash);
   if ( verified ) {
-    var newName = req.param( 'name' ).replace(/\.[^\.]*/g,""),
-        name = req.params.file.replace(/\.[^\.]*/g,""),
-        ext = req.params.file.replace(/[^\.]*/,""),
-        newFile = escape(newName)+ext,
-        file = req.params.file,
+    var file = req.params.file,
+        ext = file.split( '.' ).pop(),
+        newFile = escape(req.param( 'name' )+'.'+ext),
         headers = {
           'content-disposition': 'form-data; name="'+newFile+'"; filename="'+newFile+'"',
           'destination': '/'+container+'/'+escape(newFile)
