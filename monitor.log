@@ -1,21 +1,24 @@
-{"name":"client-client","hostname":"bouncing.local","pid":68510,"level":30,"msg":"STARTUP: STARTING","time":"2012-07-10T14:29:09.368Z","v":0}
-{"name":"client-client","hostname":"bouncing.local","pid":68510,"level":30,"msg":"CONFIGURATION: STARTING","time":"2012-07-10T14:29:09.370Z","v":0}
-{"name":"client-client","hostname":"bouncing.local","pid":68510,"level":30,"msg":"CONFIGURATION: SUCCESS","time":"2012-07-10T14:29:09.373Z","v":0}
-{"name":"client-client","hostname":"bouncing.local","pid":68510,"level":30,"msg":"DATABASE: STARTING","time":"2012-07-10T14:29:09.373Z","v":0}
-{"name":"client-client","hostname":"bouncing.local","pid":68510,"level":30,"msg":"DATABASE: SUCCESS","time":"2012-07-10T14:29:10.083Z","v":0}
-{"name":"client-client","hostname":"bouncing.local","pid":68510,"level":30,"msg":"RACKSPACE: STARTING","time":"2012-07-10T14:29:10.084Z","v":0}
-{"name":"client-client","hostname":"bouncing.local","pid":68510,"level":30,"msg":"RACKSPACE: SUCCESS","time":"2012-07-10T14:29:10.084Z","v":0}
-{"name":"client-client","hostname":"bouncing.local","pid":68510,"level":30,"msg":"USERS: STARTING","time":"2012-07-10T14:29:10.084Z","v":0}
-{"name":"client-client","hostname":"bouncing.local","pid":68510,"level":30,"msg":"USERS: SUCCESS","time":"2012-07-10T14:29:10.084Z","v":0}
-{"name":"client-client","hostname":"bouncing.local","pid":68510,"level":30,"msg":"EXPRESS: STARTING","time":"2012-07-10T14:29:10.084Z","v":0}
-{"name":"client-client","hostname":"bouncing.local","pid":68510,"level":30,"msg":"EXPRESS: SUCCESS","time":"2012-07-10T14:29:10.128Z","v":0}
-{"name":"client-client","hostname":"bouncing.local","pid":68510,"level":30,"msg":"IO: STARTING","time":"2012-07-10T14:29:10.128Z","v":0}
+{"name":"client-client","hostname":"bouncing.local","pid":69392,"level":30,"msg":"STARTUP: STARTING","time":"2012-07-10T17:21:02.803Z","v":0}
+{"name":"client-client","hostname":"bouncing.local","pid":69392,"level":30,"msg":"CONFIGURATION: STARTING","time":"2012-07-10T17:21:02.804Z","v":0}
+{"name":"client-client","hostname":"bouncing.local","pid":69392,"level":30,"msg":"CONFIGURATION: SUCCESS","time":"2012-07-10T17:21:02.808Z","v":0}
+{"name":"client-client","hostname":"bouncing.local","pid":69392,"level":30,"msg":"DATABASE: STARTING","time":"2012-07-10T17:21:02.808Z","v":0}
+{"name":"client-client","hostname":"bouncing.local","pid":69392,"level":30,"msg":"DATABASE: SUCCESS","time":"2012-07-10T17:21:07.452Z","v":0}
+{"name":"client-client","hostname":"bouncing.local","pid":69392,"level":30,"msg":"RACKSPACE: STARTING","time":"2012-07-10T17:21:07.452Z","v":0}
+{"name":"client-client","hostname":"bouncing.local","pid":69392,"level":30,"msg":"RACKSPACE: SUCCESS","time":"2012-07-10T17:21:07.453Z","v":0}
+{"name":"client-client","hostname":"bouncing.local","pid":69392,"level":30,"msg":"USERS: STARTING","time":"2012-07-10T17:21:07.453Z","v":0}
+{"name":"client-client","hostname":"bouncing.local","pid":69392,"level":30,"msg":"USERS: SUCCESS","time":"2012-07-10T17:21:07.453Z","v":0}
+{"name":"client-client","hostname":"bouncing.local","pid":69392,"level":30,"msg":"EXPRESS: STARTING","time":"2012-07-10T17:21:07.453Z","v":0}
+{"name":"client-client","hostname":"bouncing.local","pid":69392,"level":30,"msg":"EXPRESS: SUCCESS","time":"2012-07-10T17:21:07.496Z","v":0}
+{"name":"client-client","hostname":"bouncing.local","pid":69392,"level":30,"msg":"IO: STARTING","time":"2012-07-10T17:21:07.496Z","v":0}
 info: socket.io started
-{"name":"client-client","hostname":"bouncing.local","pid":68510,"level":30,"msg":"IO: SUCCESS","time":"2012-07-10T14:29:10.129Z","v":0}
-{"name":"client-client","hostname":"bouncing.local","pid":68510,"level":30,"msg":"PROJECTS: STARTING","time":"2012-07-10T14:29:10.129Z","v":0}
-{"name":"client-client","hostname":"bouncing.local","pid":68510,"level":30,"msg":"PROJECTS: SUCCESS","time":"2012-07-10T14:29:10.129Z","v":0}
-{"name":"client-client","hostname":"bouncing.local","pid":68510,"level":30,"msg":"ROUTES: STARTING","time":"2012-07-10T14:29:10.129Z","v":0}
-{"name":"client-client","hostname":"bouncing.local","pid":68510,"level":30,"msg":"ROUTES: SUCCESS","time":"2012-07-10T14:29:10.131Z","v":0}
-{"name":"client-client","hostname":"bouncing.local","pid":68510,"level":30,"msg":"LISTENING: STARTING","time":"2012-07-10T14:29:10.131Z","v":0}
-{"name":"client-client","hostname":"bouncing.local","pid":68510,"level":30,"msg":"LISTENING: SUCCESS","time":"2012-07-10T14:29:10.131Z","v":0}
-{"name":"client-client","hostname":"bouncing.local","pid":68510,"level":30,"msg":"STARTUP: SUCCESS","time":"2012-07-10T14:29:10.131Z","v":0}
+{"name":"client-client","hostname":"bouncing.local","pid":69392,"level":30,"msg":"IO: SUCCESS","time":"2012-07-10T17:21:07.497Z","v":0}
+{"name":"client-client","hostname":"bouncing.local","pid":69392,"level":30,"msg":"PROJECTS: STARTING","time":"2012-07-10T17:21:07.497Z","v":0}
+{"name":"client-client","hostname":"bouncing.local","pid":69392,"level":30,"msg":"PROJECTS: SUCCESS","time":"2012-07-10T17:21:07.497Z","v":0}
+{"name":"client-client","hostname":"bouncing.local","pid":69392,"level":30,"msg":"ROUTES: STARTING","time":"2012-07-10T17:21:07.497Z","v":0}
+{"name":"client-client","hostname":"bouncing.local","pid":69392,"level":30,"msg":"ROUTES: SUCCESS","time":"2012-07-10T17:21:07.499Z","v":0}
+{"name":"client-client","hostname":"bouncing.local","pid":69392,"level":30,"msg":"LISTENING: STARTING","time":"2012-07-10T17:21:07.499Z","v":0}
+{"name":"client-client","hostname":"bouncing.local","pid":69392,"level":30,"msg":"LISTENING: SUCCESS","time":"2012-07-10T17:21:07.500Z","v":0}
+{"name":"client-client","hostname":"bouncing.local","pid":69392,"level":30,"msg":"STARTUP: SUCCESS","time":"2012-07-10T17:21:07.500Z","v":0}
+[Error: Rackspace Error (404): Item not found]
+[Error: Rackspace Error (404): Item not found]
+[Error: Rackspace Error (404): Item not found]

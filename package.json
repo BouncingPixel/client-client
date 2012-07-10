@@ -7,7 +7,7 @@
     "async": "0.1.x",
     "cloudfiles": "*",
     "bcrypt": "*",
-    "express": "https://github.com/visionmedia/express/tarball/master",
+    "express": "https://github.com/visionmedia/express",
     "dustjs-linkedin": "*",
     "consolidate": "*",
     "bunyan": "0.6.x"

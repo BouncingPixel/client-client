@@ -1,7 +1,7 @@
 
 var cloudfiles = require('cloudfiles'),
     async = require('async');
-var _config, _self;
+var _config, _self, _client_config;
 
 //
 var Rackspace = exports.Rackspace = function( spec ) {
@@ -16,16 +16,21 @@ var Rackspace = exports.Rackspace = function( spec ) {
   _self = this;
 };
 
-var init = function (next) {
+var init = function (next, sync) {
   if (_self.expired()) {
     _self.client = cloudfiles.createClient( _config );
-
-    _self.client.setAuth( function (err) {
-      if( err ) { return next( err ); }
-
-      _self.expiry = new Date().getTime() + 23*60*60*1000;
+    if(sync) {
+      _self.client.authorized = true;
+      _self.client.config = _client_config;
       next();
-    })  
+    } else {
+      _self.client.setAuth( function (err, res, config) {
+        if( err ) { return next( err ); }
+        _client_config = config;
+        _self.expiry = new Date().getTime() + 23*60*60*1000;
+        next();
+      });
+    }
   } else {
     next();
   }
@@ -53,7 +58,7 @@ Rackspace.prototype.saveStream = function( containerName, imageName, stream, cal
     _self.client.addFile( containerName, 
       { remote:imageName, stream:stream, headers: stream.headers }, 
       callback );
-  });
+  }, true);
 };
 
 //
