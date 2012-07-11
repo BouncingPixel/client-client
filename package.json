@@ -1,23 +1,27 @@
 {
   "name": "client-client",
-  "version": "0.0.1",
+  "version": "0.0.1-44",
   "dependencies": {
     "mongodb": "*",
     "connect-mongodb": "*",
-    "async": "0.1.x",
-    "cloudfiles": "*",
     "bcrypt": "*",
-    "express": "https://github.com/visionmedia/express",
+    "async": "0.1.x",
+    "cloudfiles": "https://github.com/BouncingPixel/node-cloudfiles/tarball/master",
+    "express": "3.0.0beta1",
     "dustjs-linkedin": "*",
     "consolidate": "*",
-    "bunyan": "0.6.x"
+    "bunyan": "0.6.x",
+    "socket.io": "0.9.x",
+    "formidable": "*",
+    "qs": "*"
   },
   "scripts": {
     "start": "server.js"
   },
   "env": {
     "NODE_ENV": "development",
-    "SUBDOMAIN": "client"
+    "SUBDOMAIN": "client",
+    "PYTHON": "/opt/local/bin/python2.7"
   },
   "subdomain": "client",
   "engines": {
