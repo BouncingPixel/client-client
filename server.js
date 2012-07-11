@@ -14,6 +14,7 @@
   var Logger = require('bunyan');
   var sio = require("socket.io");
   var Rackspace = require('./Rackspace').Rackspace;
+  var HerokuClient = require('./HerokuClient').HerokuClient;
   var Users = require('./Users').Users;
   var Projects = require('./Projects').Projects;
 
@@ -23,6 +24,7 @@
   var io;
   var mongo;
   var rackspace;
+  var herokuClient;
   var users;
   var projects;
 
@@ -32,6 +34,11 @@
       err: Logger.stdSerializers.err
     } 
   });
+
+  var sanitize = function ( str ) {
+    if(str && typeof str === "string") return str.replace( /[^a-zA-Z\d_\-]/g, '' );
+    return "";
+  };
 
   log.info( "STARTUP: STARTING");
 
@@ -63,6 +70,13 @@
     log.info( "RACKSPACE: STARTING" );
     rackspace = new Rackspace( configuration.rackInfo );
     log.info( "RACKSPACE: SUCCESS");
+    callback();
+  };
+
+  var startHerokuClient = function( callback ) {
+    log.info( "HEROKUCLIENT: STARTING" );
+    herokuClient = new HerokuClient( configuration.herokuInfo );
+    log.info( "HEROKUCLIENT: SUCCESS" );
     callback();
   };
 
@@ -256,8 +270,9 @@
       var clients,
           project,
           files,
+          herokuApps,
           maybeEnd = function () {
-            if(typeof clients !== "undefined" && typeof project !== "undefined" && typeof files !== "undefined") {
+            if(typeof clients !== "undefined" && typeof project !== "undefined" && typeof files !== "undefined" && typeof herokuApps !== "undefined") {
               var auth = req.session.type==="admin";
               var perm = auth||req.session.type==="employee";
               var bcrypt = require( 'bcrypt' );
@@ -266,52 +281,76 @@
               clients = clients.filter( function( val ) {
                 return project[0].users.indexOf(val.name)<0;
               });
+              herokuApps = herokuApps.filter( function( val ) {
+                return project[0].herokuApps.indexOf(val.name)<0;
+              });
               var locals = { project: { name: project[0].name,
                                         users: project[0].users || [],
                                         uri: project[0].uri,
                                         sharingEnabled: project[0].sharingEnabled,
                                         container: project[0].container,
-                                        hash: hash
+                                        hash: hash,
+                                        herokuApps: project[0].herokuApps
                                       },
                              name:req.session.name,
                              auth:auth,
                              perm:perm,
                              clients:clients,
-                             files:files };
+                             files:files,
+                             herokuApps:herokuApps };
               res.render( 'project', locals );
             }
           };
       async.parallel([
-        function () {
+        function (callback) {
           users.getAllClients( function( err, array ) {
             if(err) {
               console.log(err);
-              return res.send(500);
+              res.send(500);
+              return callback(err);
             }
             clients = array;
-            maybeEnd();
+            callback();
           });
-        }, function () {
+        }, function (callback) {
           projects.find( req.params.uri, function( err, obj ) {
             if(err) {
               console.log(err);
-              return res.send(500);
+              res.send(500);
+              return callback(err);
             }
             project = obj;
             projects.getFiles( project[0], function( err, array ) {
               if(err) {
                 console.log(err);
-                return res.send(500);
+                res.send(500);
+                return callback(err);
               }
               files = array;
-              maybeEnd();
+              callback();
             });
+          });
+        }, function (callback) {
+          herokuClient.listApps(function (err, json) {
+            if(err) {
+              console.log(err);
+              res.send(500);
+              return callback(err);
+            }
+            try {
+              herokuApps = JSON.parse(json);
+            } catch(err) {
+              console.log(err);
+              res.send(500);
+              return callback(err);
+            }
+            callback();
           });
         }], function (err) {
           if(err) {
             console.log(err);
-            return res.send(500);
           }
+          maybeEnd();
         });
     });
 
@@ -342,6 +381,59 @@
     cc.post( '/projects/:uri/update/:file', function( req, res, next ) {
       projects.updateFile( req, res, next );
     });
+
+    cc.post( '/projects/:uri/addHerokuApp', function( req, res, next ) {
+      projects.addHerokuApp( req, res, next );
+    });
+
+    cc.get( '/users/:uri', function( req, res, next ) {
+      var user;
+      async.series([function (callback) {
+        users.find(req.params.uri, function (err, array) {
+          if(err) {
+            console.log(err);
+            res.send(500);
+            return callback(err);
+          }
+          user = array[0];
+          callback();
+        });
+      }, function (callback) {
+        projects.getProjectsForUser(user.name, function (err, array) {
+          if(err) {
+            console.log(err);
+            res.send(500);
+            return callback(err);
+          }
+          var projects = array.map(function (project) {
+            if(Array.isArray(project.users) && project.users) {
+              project.users = project.users.map(function (user) {
+                return {
+                  name: user,
+                  id: sanitize(user).toLowerCase()
+                };
+              });
+            }
+            return project;
+          });
+          var auth = req.session.type==="admin";
+          var perm = auth||req.session.type==="employee";
+          var locals = {
+            name: req.session.name,
+            auth: auth,
+            perm: perm,
+            user: user||{},
+            projects: projects||[]
+          };
+          res.render( 'userStats', locals );
+          callback();
+        });
+      }], function (err) {
+        if(err) {
+          console.log(err);
+        }
+      });
+    });
     
     log.info( "ROUTES: SUCCESS" );
     callback();
@@ -362,6 +454,7 @@
                   startConfiguration,
                   startDatabase,
                   startRackspace,
+                  startHerokuClient,
                   startUsers,
                   startExpressConfiguration,
                   startSocketIO,

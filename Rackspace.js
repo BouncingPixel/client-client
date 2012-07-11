@@ -1,5 +1,5 @@
 
-var cloudfiles = require('cloudfiles'),
+var cloudfiles = require('node-cloudfiles'),
     async = require('async');
 var _config, _self, _client_config;
 

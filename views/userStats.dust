@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+  	<title>{title}</title>
+  	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  	<link href="/css/bootstrap.css" rel="stylesheet">
+  	<link href="/css/bootstrap-responsive.css" rel="stylesheet">
+  	<!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+  	<!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+  	<div class="container">
+	  	<div class="row">
+	  		<div class="span4 offset4 well" style="text-align:center;">
+	  			{>"views/user.dust"/}
+	  		</div>
+	  	</div>
+		<div class="row">
+			<div class="span4 offset4 well">
+				{user.name} :: {user.type}
+				<br/>
+				<br/>
+				{?projects}
+				Projects
+				<ul>
+					{#projects}
+					<li>
+						{?auth}
+							<a href="/projects/{.uri}">{.name}</a>
+						{:else}
+							{.name}
+						{/auth}
+						{?.users}
+						<br/>Members
+						<ol>
+							{#.users}
+							{?auth}
+							<li><a href="/users/{.id}">{.name}</a></li>
+							{:else}
+							<li>{.name}</li>
+							{/auth}
+							{/.users}
+						</ol>
+						{/.users}
+					</li>
+					<li style="list-style-type:none"><br/></li>
+					{/projects}
+				</ul>
+				{:else}
+				No projects!
+				{/projects}
+			</div>
+		</div>
+	</div>
+  </body>
+</html>

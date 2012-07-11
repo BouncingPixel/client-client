@@ -110,3 +110,8 @@ Users.prototype.getAllClients = function( callback ) {
   var self = this;
   self._users.find( { type:"client" }, { name:1 } ).toArray( callback );
 };
+
+Users.prototype.find = function( id, callback ) {
+  var self = this;
+  self._users.find( { id:id }, { name:1, id:1, type:1 } ).toArray( callback );
+};

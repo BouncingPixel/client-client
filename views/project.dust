@@ -47,13 +47,13 @@
 		      <ul>
 			  	{#users uri=uri auth=auth}
 				  <li style="text-align:left">
-				  	<form method="POST" action="/projects/{uri}/removeUser">
-				  	  {.} 
-					  {?auth}
+				  	{.}
+				  	{?auth}
+				  	  <form method="POST" action="/projects/{uri}/removeUser" class="form-inline"> 
 				  	  	<input type="hidden" name="name" value="{.}">
 				  		<button type="submit" class="btn-mini" style="padding: 0px 0px 0px 0px"><i class="icon-remove"></i></button>
-					  {/auth}
-					</form>
+					  </form>
+					{/auth}
 				  </li>
 				{/users}
 			  </ul>
@@ -71,39 +71,63 @@
 	        {/project}
 	      </div>
 	    </div>
-	  	<div class="row">
-	  	  <div class="span6 offset3 well" style="text-align:center;">
-	  		<form action="/projects/{project.uri}/enableSharing" method="POST">
-	  		  <input type="checkbox"
-	  		  {?project.sharingEnabled}
-	  			checked="checked" disabled="disabled"
-	  		  {:else}
-	  			onclick="disable( event );"
-	  		  {/project.sharingEnabled}
-	  		  id="canFileShare"> File Sharing
-	  		</form>
-	  		{?project.sharingEnabled}
-	  		  <form action="/projects/{project.uri}/upload" method="POST" enctype="multipart/form-data" id="file-upload-form" name="file-upload-form">
-	  		  	<input type="hidden" name="container" value="{project.container}">
-	  		  	<input type="hidden" name="hash" value="{project.hash}">
-	  		  	<div id="progress-bars" style="display:none">
-	  		  		Upload Progress:
-		  		  	<div class="progress progress-striped progress-info active" id="upload-progress">
-		  		  		<div class="bar" style="width:0%" id="upload-bar"></div>
-		  		  	</div>
-		  		  	Send Progress:
-		  		  	<div class="progress progress-striped progress-success active" id="send-progress">
-		  		  		<div class="bar" style="width:0%" id="send-bar"></div>
-		  		  	</div>
-		  		</div>
-	  			<input type="file" class="input" name="file" multiple="true">
-	  			<button class="btn" onclick="upload(event);" id="upload-btn"><i class="icon-upload"></i></button>
-	  		  </form>
-	  		  {>"views/cloudFiles.dust"/}
-	  		{/project.sharingEnabled}
-	  	  </div>
-	  	</div>
 	  {/auth}
+	  <div class="row">
+	  	<div class="span6 offset3 well" style="text-align:center">
+	  	  Heroku Apps
+	  	  <br/>
+	  	  <br/>
+	  	  {?auth}
+	  	  <form action="/projects/{project.uri}/addHerokuApp" method="POST" class="form-inline">
+	  	  	Name: <select name="appName" {^herokuApps}disabled="disabled"{/herokuApps}>
+	  	  			{#herokuApps}
+	  	  			<option>{.name}</option>
+	  	  			{/herokuApps}
+	  	  		  </select>
+	  		<br/>
+	  		<br/>
+	  	  	<button type="submit" class="btn">Add Heroku App</button>
+	  	  </form>
+	  	  {/auth}
+	  	  {?project.herokuApps}
+	  	  	{>"views/herokuApps.dust"/}
+	  	  {:else}
+	  	  	No heroku apps!
+	  	  {/project.herokuApps}
+	  	</div>
+	  </div>
+  	  <div class="row">
+  	    <div class="span6 offset3 well" style="text-align:center;">
+  		  <form action="/projects/{project.uri}/enableSharing" method="POST">
+  		    <input type="checkbox"
+  		    {?project.sharingEnabled}
+  			  checked="checked" disabled="disabled"
+  		    {:else}
+  			  onclick="disable( event );"
+  		    {/project.sharingEnabled}
+  		    id="canFileShare"> File Sharing
+  		  </form>
+  		  {?project.sharingEnabled}
+  		    <form action="/projects/{project.uri}/upload" method="POST" enctype="multipart/form-data" id="file-upload-form" name="file-upload-form">
+  		      <input type="hidden" name="container" value="{project.container}">
+  		  	  <input type="hidden" name="hash" value="{project.hash}">
+  		  	  <div id="progress-bars" style="display:none">
+  		  		Upload Progress:
+	  		  	<div class="progress progress-striped progress-info active" id="upload-progress">
+	  		  	  <div class="bar" style="width:0%" id="upload-bar"></div>
+	  		  	</div>
+	  		  	Send Progress:
+	  		  	<div class="progress progress-striped progress-success active" id="send-progress">
+	  		  	  <div class="bar" style="width:0%" id="send-bar"></div>
+	  		  	</div>
+	  		  </div>
+  			  <input type="file" class="input" name="file" multiple="true">
+  			  <button class="btn" onclick="upload(event);" id="upload-btn"><i class="icon-upload"></i></button>
+  		    </form>
+  		    {>"views/cloudFiles.dust"/}
+  		  {/project.sharingEnabled}
+  	    </div>
+  	  </div>
 	</div>
   </body>
 </html>

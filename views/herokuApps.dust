@@ -1,0 +1,11 @@
+<ul style="text-align:left">
+	{#project.herokuApps auth=auth uri=project.uri}
+	<li>
+		{?auth}
+			<a href="projects/{uri}/herokuApps/{.}">{.}</a>
+		{:else}
+			{.}
+		{/auth}
+	</li>
+	{/project.herokuApps}
+</ul>
