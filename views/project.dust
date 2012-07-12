@@ -42,14 +42,26 @@
 	  	<div class="span6 offset3 well" style="text-align:center;">
 		  Project<br />
 		  {#project auth=auth}
-		    {name}<br />
+		    {name}
+		</div>
+	  </div>
+	  <div class="row">
+		<div class="span6 offset3 well" style="text-align:center;">
+			Users
+			<br/>
+			<br/>
+			{?auth}
+			  {#project}
+				{>"views/joinUser.dust"/}
+			  {/project}
+			{/auth}
 		    {?users}
 		      <ul>
 			  	{#users uri=uri auth=auth}
 				  <li style="text-align:left">
 				  	{.}
 				  	{?auth}
-				  	  <form method="POST" action="/projects/{uri}/removeUser" class="form-inline"> 
+				  	  <form method="POST" action="/projects/{uri}/removeUser" style="display:inline"> 
 				  	  	<input type="hidden" name="name" value="{.}">
 				  		<button type="submit" class="btn-mini" style="padding: 0px 0px 0px 0px"><i class="icon-remove"></i></button>
 					  </form>
@@ -63,15 +75,6 @@
 		  {/project}
 		</div>
 	  </div>
-	  {?auth}
-	  	<div class="row">
-	      <div class="span6 offset3 well" style="text-align:center;">
-	      	{#project}
-	          {>"views/joinUser.dust"/}
-	        {/project}
-	      </div>
-	    </div>
-	  {/auth}
 	  <div class="row">
 	  	<div class="span6 offset3 well" style="text-align:center">
 	  	  Heroku Apps

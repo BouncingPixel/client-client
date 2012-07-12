@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-  	<title>{title}</title>
+  	<title>{user.name} :: {user.type}</title>
   	<meta name="viewport" content="width=device-width, initial-scale=1.0">
   	<link href="/css/bootstrap.css" rel="stylesheet">
   	<link href="/css/bootstrap-responsive.css" rel="stylesheet">
@@ -17,42 +17,42 @@
 	  			{>"views/user.dust"/}
 	  		</div>
 	  	</div>
-		<div class="row">
-			<div class="span4 offset4 well">
-				{user.name} :: {user.type}
-				<br/>
-				<br/>
-				{?projects}
-				Projects
-				<ul>
-					{#projects}
-					<li>
-						{?auth}
-							<a href="/projects/{.uri}">{.name}</a>
-						{:else}
-							{.name}
-						{/auth}
-						{?.users}
-						<br/>Members
-						<ol>
-							{#.users}
+			<div class="row">
+				<div class="span6 offset3 well">
+					{user.name} :: {user.type}
+					<br/>
+					<br/>
+					{?projects}
+					Projects
+					<ul>
+						{#projects}
+						<li>
 							{?auth}
-							<li><a href="/users/{.id}">{.name}</a></li>
+								<a href="/projects/{.uri}">{.name}</a>
 							{:else}
-							<li>{.name}</li>
+								{.name}
 							{/auth}
+							{?.users}
+							<br/>Members
+							<ol>
+								{#.users}
+								{?auth}
+								<li><a href="/users/{.id}">{.name}</a></li>
+								{:else}
+								<li>{.name}</li>
+								{/auth}
+								{/.users}
+							</ol>
 							{/.users}
-						</ol>
-						{/.users}
-					</li>
-					<li style="list-style-type:none"><br/></li>
+						</li>
+						<li style="list-style-type:none"><br/></li>
+						{/projects}
+					</ul>
+					{:else}
+					No projects!
 					{/projects}
-				</ul>
-				{:else}
-				No projects!
-				{/projects}
+				</div>
 			</div>
 		</div>
-	</div>
   </body>
 </html>

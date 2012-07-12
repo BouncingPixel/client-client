@@ -297,7 +297,7 @@ Projects.prototype.updateFile = function( req, res, next ) {
       res.send(200);
       return;
     }
-    self._rackspace.updateFile( container, escape(escape(file)), headers, function (err, success) {
+    self._rackspace.renameFile( container, escape(escape(file)), headers, function (err, success) {
       if (err) {
         console.log(err);
       }

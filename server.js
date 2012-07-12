@@ -11,6 +11,7 @@
   var express = require('express');
   var consolidate = require('consolidate');
   var async = require('async');
+  var request = require('request');
   var Logger = require('bunyan');
   var sio = require("socket.io");
   var Rackspace = require('./Rackspace').Rackspace;
@@ -185,30 +186,32 @@
             }
           };
       async.parallel([
-        function () {
+        function (callback) {
           users.getAllUsers(function( err, array ) {
             if(err) {
               console.log(err);
               res.send(500);
             } else {
               _users = array;
-              maybeEnd();
+              callback();
             }
           });
-        }, function () {
+        }, function (callback) {
           projects.getAllProjects(function( err, array ) {
             if(err) {
               console.log(err);
               res.send(500);
+              callback(err);
             } else {
               _projects = array;
-              maybeEnd();
+              callback();
             }
           });
         }], function (err) {
           if(err) {
             console.log(err);
-            res.send(500);
+          } else {
+          	maybeEnd();
           }
         });
     });
@@ -227,33 +230,38 @@
                              users:_users || [],
                              projects:_projects || [] };
               res.render( 'dashboard', locals );
+            } else {
+            	res.send(500);
             }
           };
       async.parallel([
-        function () {
+        function (callback) {
           users.getAllUsers(function( err, array ) {
             if(err) {
               console.log(err);
               res.send(500);
+              callback(err);
             } else {
               _users = array;
-              maybeEnd();
+              callback();
             }
           });
-        }, function () {
+        }, function (callback) {
           projects.getAllProjects(function( err, array ) {
             if(err) {
               console.log(err);
               res.send(500);
+              callback(err);
             } else {
               _projects = array;
-              maybeEnd();
+              callback();
             }
           });
         }], function (err) {
           if(err) {
             console.log(err);
-            res.send(500);
+          } else {
+          	maybeEnd();
           }
         });
     });
@@ -349,8 +357,9 @@
         }], function (err) {
           if(err) {
             console.log(err);
+          } else {
+          	maybeEnd();
           }
-          maybeEnd();
         });
     });
 
@@ -384,6 +393,88 @@
 
     cc.post( '/projects/:uri/addHerokuApp', function( req, res, next ) {
       projects.addHerokuApp( req, res, next );
+    });
+    
+    cc.get( '/herokuApps/:name', function( req, res, next ) {
+    	var json,
+    			logplex,
+    			complete = function (err) {
+    				try {
+							var info = JSON.parse(json);
+							var auth = req.session.type==="admin";
+							var perm = auth||req.session.type==="employee";
+							var locals = {
+								list: Object.getOwnPropertyNames(info).filter(function (prop) {
+									switch(typeof info[prop]) {
+										case "undefined":
+											return false;
+										case "object":
+										case "string":
+											return !!info[prop];
+										default:
+											return true;
+									}
+								}).map(function (prop) {
+									var val;
+									if(prop === "domain_name") {
+										val = info[prop].domain;
+									} else {
+										val = info[prop];
+									}
+									return {
+										name:prop,
+										value:val
+									};
+								}),
+								dict: info,
+								logplex: logplex,
+								name: req.session.name,
+								auth: auth,
+								perm: perm
+							};
+							res.render( 'herokuStatus', locals );
+						} catch(err) {
+							console.log(err);
+							return res.send(500);
+						}
+					};
+			async.parallel([function (callback) {
+					herokuClient.getInfo( req.params.name, function (err, body) {
+						if(err) {
+							console.log(err);
+							res.send(500);
+							return callback(err);
+						}
+						json = body;
+						callback();
+					});
+				}, function (callback) {
+					herokuClient.getLogs( req.params.name, null, null, null, null, function (err, body) {
+						if(err) {
+							console.log(err);
+							res.send(500);
+							return callback(err);
+						}
+						logplex = body;
+						callback();
+					});
+				}], function (err) {
+					if(err) {
+						console.log(err);
+						return;
+					} else {
+						complete();
+					}
+			});
+    });
+    
+    cc.post( '/herokuApps/:name', function ( req, res, next ) {
+    	var uri = req.param( 'log' );
+    	if(typeof uri==="string") {
+    		request({method:"GET", uri:uri}).pipe(res);
+    	} else {
+    		res.send(500);
+    	}
     });
 
     cc.get( '/users/:uri', function( req, res, next ) {
@@ -428,11 +519,7 @@
           res.render( 'userStats', locals );
           callback();
         });
-      }], function (err) {
-        if(err) {
-          console.log(err);
-        }
-      });
+      }]);
     });
     
     log.info( "ROUTES: SUCCESS" );

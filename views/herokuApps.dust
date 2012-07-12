@@ -2,7 +2,7 @@
 	{#project.herokuApps auth=auth uri=project.uri}
 	<li>
 		{?auth}
-			<a href="projects/{uri}/herokuApps/{.}">{.}</a>
+			<a href="/herokuApps/{.}">{.}</a>
 		{:else}
 			{.}
 		{/auth}
