@@ -28,8 +28,35 @@
 	  			<br/>
 	  			<ul>
 	  				{#list}
-	  					<li>{.name} :: {.value|s}</li>
+	  					<li>{.name} :: {.value}</li>
 	  				{/list}
+	  				<li>Domains
+	  					<ul>
+	  				{#domains}
+	  					<li><a href="http://{.name}" target="_blank">{.name}</a>
+	  						<ul>
+	  						{#.properties}
+	  							<li>{.name} :: {.value}</li>
+	  						{/.properties}
+	  						</ul>
+	  					</li>
+	  				{/domains}
+	  					</ul>
+	  				</li>
+	  				<li>Processes
+	  					<ul>
+	  				{#processes}
+	  					<li>{.name} 
+		  					<button class="restart btn-mini btn-info" onclick="restart('{.name}')">Restart</button>
+	  						<ul>
+	  						{#.properties}
+	  							<li>{.name} :: {.value}</li>
+	  						{/.properties}
+	  						</ul>
+	  					</li>
+	  				{/processes}
+	  					</ul>
+	  				</li>
 	  			</ul>
 	  		</div>
 	  	</div>
@@ -37,7 +64,7 @@
 	  		<div class="span6 offset3 well">
 	  			Logs
 	  			<br/>
-	  			<textarea readonly="true" id="log"></textarea>
+	  			<textarea id="log" style="white-space:nowrap;overflow:scroll;width:98%;height:256px;resize:none"></textarea>
 	  		</div>
 	  	</div>
 	  </div>

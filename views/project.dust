@@ -101,17 +101,23 @@
 	  </div>
   	  <div class="row">
   	    <div class="span6 offset3 well" style="text-align:center;">
-  		  <form action="/projects/{project.uri}/enableSharing" method="POST">
-  		    <input type="checkbox"
+  	      File Sharing
+  	      <br/>
+  	      <br/>
+  	      {?auth}
+  		  <form action="/projects/{project.uri}/enableSharing" method="POST" style="display:inline-block">
+  		    <input type="checkbox" id="canFileShare"
   		    {?project.sharingEnabled}
-  			  checked="checked" disabled="disabled"
+  			  checked="checked" disabled="disabled"> Sharing Enabled
   		    {:else}
-  			  onclick="disable( event );"
+  			  onclick="disable( event );"> Enable Sharing
   		    {/project.sharingEnabled}
-  		    id="canFileShare"> File Sharing
   		  </form>
+  		  <br/>
+  		  <br/>
+  		  {/auth}
   		  {?project.sharingEnabled}
-  		    <form action="/projects/{project.uri}/upload" method="POST" enctype="multipart/form-data" id="file-upload-form" name="file-upload-form">
+  		    <form action="/projects/{project.uri}/upload" method="POST" enctype="multipart/form-data" id="file-upload-form" name="file-upload-form" style="display:inline-block">
   		      <input type="hidden" name="container" value="{project.container}">
   		  	  <input type="hidden" name="hash" value="{project.hash}">
   		  	  <div id="progress-bars" style="display:none">
@@ -128,6 +134,10 @@
   			  <button class="btn" onclick="upload(event);" id="upload-btn"><i class="icon-upload"></i></button>
   		    </form>
   		    {>"views/cloudFiles.dust"/}
+  		  {:else}
+  		  	{^auth}
+  		  	  Sharing Disabled
+  		  	{/auth}
   		  {/project.sharingEnabled}
   	    </div>
   	  </div>

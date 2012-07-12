@@ -9,7 +9,7 @@ var sanitize = function (str) {
   return "";
 }
 
-exports.HerokuClient = HerokuClient = function ( spec ) {
+var HerokuClient = exports.HerokuClient = function ( spec ) {
 	this.config = spec;
 	this.defaultHeaders = {
 		Accept: "application/json",
@@ -115,10 +115,10 @@ HerokuClient.prototype = {
 			var headers = this.getDefaultHeaders();
 			var method = "GET";
 			var query = "logplex=true";
-			if(typeof num === "number") body += "&num="+num;
-			if(typeof ps === "string") body += "&ps="+string;
-			if(typeof source === "string") body += "&source="+source;
-			if(tail) body += "&tail=1";
+			if(typeof num === "number") query += "&num="+num;
+			if(typeof ps === "string") query += "&ps="+escape(string);
+			if(typeof source === "string") query += "&source="+escape(source);
+			if(tail) query += "&tail=1";
 			var options = {
 				uri:uri+"?"+query,
 				headers:headers,
@@ -150,8 +150,54 @@ HerokuClient.prototype = {
 		}
 	},
 	runProcess: function (appName,attach,command,callback){},
-	restart: function (appName,process,type,callback){},
-	stop: function (appName,process,type,callback){},
+	restart: function (appName,ps,type,callback){
+		appName = sanitize(appName);
+		if(appName) {
+			var uri = "https://api.heroku.com/apps/"+appName+"/ps/restart";
+			var headers = this.getDefaultHeaders();
+			var method = "POST";
+			var query = "";
+			if(typeof ps === "string") query += "ps="+escape(ps);
+			if(typeof type === "string") {
+				if(query.length) query += "&type="+escape(type);
+				else query += "type="+escape(type);
+			}
+			var options = {
+				uri:uri+"?"+query,
+				headers:headers,
+				method:method
+			}
+			return request(options, function (err, res, body) {
+				callback(err, body);
+			});
+		} else {
+			callback(new Error("Invalid appName"));
+		}
+	},
+	stop: function (appName,ps,type,callback){
+		appName = sanitize(appName);
+		if(appName) {
+			var uri = "https://api.heroku.com/apps/"+appName+"/ps/stop";
+			var headers = this.getDefaultHeaders();
+			var method = "POST";
+			var query = "";
+			if(typeof ps === "string") query += "ps="+escape(ps);
+			if(typeof type === "string") {
+				if(query.length) query += "&type="+escape(type);
+				else query += "type="+escape(type);
+			}
+			var options = {
+				uri:uri+"?"+query,
+				headers:headers,
+				method:method
+			}
+			return request(options, function (err, res, body) {
+				callback(err, body);
+			});
+		} else {
+			callback(new Error("Invalid appName"));
+		}
+	},
 	scale: function (appName,type,qty,callback){},
 	listReleases: function (appName,callback){
 		appName = sanitize(appName);

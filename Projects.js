@@ -58,7 +58,7 @@ Projects.prototype.getAllProjects = function( callback ) {
 
 Projects.prototype.getProjectsForUser = function ( username, callback ) {
   var self = this;
-  self._projects.find( { users:username }, { name:1, users:1, uri:1 } ).toArray( callback );
+  self._projects.find( { users: { '$in': [username] } }, { name:1, users:1, uri:1 } ).toArray( callback );
 };
 
 Projects.prototype.addUser = function( req, res, next ) {
