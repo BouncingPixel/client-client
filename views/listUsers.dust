@@ -1,11 +1,11 @@
 {?users}
 	Users
-	<ul>
+	<ul style="text-align:left">
 		{#users auth=auth}
 			{?auth}
-				<li style="text-align:left"><a href="/users/{id}">{name}</a> :: {type}</li>
+				<li><a href="/users/{id}">{name}</a> :: {type}</li>
 			{:else}
-				<li style="text-align:left">{name} :: {type}</li>
+				<li>{name} :: {type}</li>
 			{/auth}
 		{/users}
 

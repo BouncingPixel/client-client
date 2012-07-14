@@ -12,47 +12,48 @@
   </head>
   <body>
   	<div class="container">
+  		{>"views/contents.dust"/}
 	  	<div class="row">
 	  		<div class="span4 offset4 well" style="text-align:center;">
 	  			{>"views/user.dust"/}
 	  		</div>
 	  	</div>
-			<div class="row">
-				<div class="span6 offset3 well">
-					{user.name} :: {user.type}
-					<br/>
-					<br/>
-					{?projects}
-					Projects
-					<ul>
-						{#projects}
-						<li>
+		<div class="row">
+			<div class="span6 offset3 well">
+				{user.name} :: {user.type}
+				<br/>
+				<br/>
+				{?userProjects}
+				Projects
+				<ul>
+					{#userProjects}
+					<li>
+						{?auth}
+							<a href="/projects/{.uri}">{.name}</a>
+						{:else}
+							{.name}
+						{/auth}
+						{?.users}
+						<br/>Members
+						<ol>
+							{#.users}
 							{?auth}
-								<a href="/projects/{.uri}">{.name}</a>
+							<li><a href="/users/{.id}">{.name}</a></li>
 							{:else}
-								{.name}
+							<li>{.name}</li>
 							{/auth}
-							{?.users}
-							<br/>Members
-							<ol>
-								{#.users}
-								{?auth}
-								<li><a href="/users/{.id}">{.name}</a></li>
-								{:else}
-								<li>{.name}</li>
-								{/auth}
-								{/.users}
-							</ol>
 							{/.users}
-						</li>
-						<li style="list-style-type:none"><br/></li>
-						{/projects}
-					</ul>
-					{:else}
-					No projects!
-					{/projects}
-				</div>
+						</ol>
+						{/.users}
+					</li>
+					<li style="list-style-type:none"><br/></li>
+					{/userProjects}
+				</ul>
+				{:else}
+				No projects!
+				{/userProjects}
 			</div>
 		</div>
+	</div>
   </body>
 </html>

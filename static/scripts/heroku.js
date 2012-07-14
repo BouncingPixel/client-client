@@ -6,10 +6,10 @@ var loadLog = function () {
 	}, false);
 	xmlhttp.send();
 	$("#log").attr("wrap", "off");
-	$("#log").html("Loading...");
 	$("#log").on("focus", function (e) {
 		$(this).blur();
 	});
+	$("#log").html("Loading...");
 };
 
 var restart = function (ps) {

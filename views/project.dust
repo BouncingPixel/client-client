@@ -4,7 +4,6 @@
   	<title>Project :: {project.name}</title>
   	<meta name="viewport" content="width=device-width, initial-scale=1.0">
   	<link href="/css/bootstrap.css" rel="stylesheet">
-  	<link href="/css/bootstrap-responsive.css" rel="stylesheet">
   	<!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
   	<!--[if lt IE 9]>
       <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
@@ -33,6 +32,7 @@
   	  </div>
   	</div>
   	<div class="container">
+  	  {>"views/contents.dust"/}
   	  <div class="row">
   		<div class="span4 offset4 well" style="text-align:center;">
   		  {>"views/user.dust"/}
@@ -63,7 +63,7 @@
 				  	{?auth}
 				  	  <form method="POST" action="/projects/{uri}/removeUser" style="display:inline"> 
 				  	  	<input type="hidden" name="name" value="{.}">
-				  		<button type="submit" class="btn-mini" style="padding: 0px 0px 0px 0px"><i class="icon-remove"></i></button>
+				  		<button type="submit" class="btn btn-mini"><span style="font-weight:bold">&times;</span></button>
 					  </form>
 					{/auth}
 				  </li>
@@ -114,7 +114,6 @@
   		    {/project.sharingEnabled}
   		  </form>
   		  <br/>
-  		  <br/>
   		  {/auth}
   		  {?project.sharingEnabled}
   		    <form action="/projects/{project.uri}/upload" method="POST" enctype="multipart/form-data" id="file-upload-form" name="file-upload-form" style="display:inline-block">
@@ -131,8 +130,9 @@
 	  		  	</div>
 	  		  </div>
   			  <input type="file" class="input" name="file" multiple="true">
-  			  <button class="btn" onclick="upload(event);" id="upload-btn"><i class="icon-upload"></i></button>
+  			  <button class="btn btn-mini" onclick="upload(event);" id="upload-btn"><i class="icon-upload"></i></button>
   		    </form>
+  		    <br/>
   		    {>"views/cloudFiles.dust"/}
   		  {:else}
   		  	{^auth}

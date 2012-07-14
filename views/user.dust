@@ -1,2 +1,5 @@
-BOUNCING PIXEL<br />
-{name}
+<div class="nav">
+	<span class="nav-header"><h4>Bouncing Pixel</h4></span>
+	<h6>{name}</h6>
+</div>
+

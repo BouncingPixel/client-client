@@ -1,10 +1,10 @@
-<form method="POST" action="/projects/{uri}/addUser">
-	User: <select class="input" name="name" {^clients}disabled="disabled"{/clients}>
+<form method="POST" action="/projects/{uri}/addUser" class="form-inline">
+	User: <select name="name" {^clients}disabled="disabled"{/clients}>
 	{#clients}
 		<option value="{name}">{name}</option>
 	{/clients}
 	</select>
 	<br/>
 	<br/>
-	<button type="submit" class="btn">add user</button>
+	<button type="submit" class="btn">Add User</button>
 </form>

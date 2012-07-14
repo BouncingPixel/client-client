@@ -149,6 +149,276 @@
   var startExpressRoutes = function( callback ) {
     log.info( "ROUTES: STARTING" );
 
+    var getLocals = function (asyncMethods, options, callback) {
+      var locals = {};
+
+      var methods = {
+        getAllUsers: function (callback) {
+          users.getAllUsers(function (err, array) {
+            if(err) {
+              console.log(err);
+              return callback(err);
+            }
+            locals.allUsers = array;
+            callback();
+          });
+        },
+        getAllClients: function (callback) {
+          users.getAllClients(function (err, array) {
+            if(err) {
+              console.log(err);
+              return callback(err);
+            }
+            locals.allClients = array;
+            callback();
+          });
+        },
+        getUser: function (userId, callback) {
+          users.find(userId, function (err, array) {
+            if(err) {
+              console.log(err);
+              return callback(err);
+            }
+            locals.user = array[0];
+            callback();
+          });
+        },
+        getProject: function (projectUri, callback) {
+          projects.find(projectUri, function (err, array) {
+            if(err) {
+              console.log(err);
+              return callback(err);
+            }
+            locals.project = array[0];
+            callback();
+          });
+        },
+        getAllProjects: function (callback) {
+          projects.getAllProjects(function (err, array) {
+            if(err) {
+              console.log(err);
+              return callback(err);
+            }
+            locals.allProjects = array;
+            callback();
+          });
+        },
+        getUserProjects: function (projectUser, callback) {
+          projects.getProjectsForUser(projectUser, function (err, array) {
+            if(err) {
+              console.log(err);
+              return callback(err);
+            }
+            locals.userProjects = array;
+            callback();
+          });
+        },
+        getProjectFiles: function (fileProject, callback) {
+          projects.getFiles(fileProject, function (err, array) {
+            if(err) {
+              console.log(err);
+              return callback(err);
+            }
+            locals.projectFiles = array;
+            callback();
+          });
+        },
+        getAllHerokuApps: function (callback) {
+          herokuClient.listApps(function (err, body) {
+            if(err) {
+              console.log(err);
+              return callback(err);
+            }
+            locals.allHerokuApps = JSON.parse(body);
+            callback();
+          });
+        },
+        getHerokuApp: function (herokuApp, callback) {
+          herokuClient.getInfo(herokuApp, function (err, body) {
+            if(err) {
+              console.log(err);
+              return callback(err);
+            }
+            locals.herokuApp = JSON.parse(body);
+            callback();
+          });
+        },
+        getHerokuAppCollaborators: function (herokuApp, callback) {
+          herokuClient.listCollaborators(herokuApp, function (err, body) {
+            if(err) {
+              console.log(err);
+              return callback(err);
+            }
+            locals.herokuAppCollaborators = JSON.parse(body);
+            callback();
+          });
+        },
+        getHerokuAppDomains: function (herokuApp, callback) {
+          herokuClient.listDomains(herokuApp, function (err, body) {
+            if(err) {
+              console.log(err);
+              return callback(err);
+            }
+            locals.herokuAppDomains = JSON.parse(body);
+            callback();
+          });
+        },
+        getHerokuAppLogs: function (herokuApp, callback) {
+          herokuClient.getLogs(herokuApp, 100, null, null, null, function (err, body) {
+            if(err) {
+              console.log(err);
+              return callback(err);
+            }
+            locals.herokuAppLogs = body;
+            callback();
+          });
+        },
+        getHerokuAppProcesses: function (herokuApp, callback) {
+          herokuClient.listProcesses(herokuApp, function (err, body) {
+            if(err) {
+              console.log(err);
+              return callback(err);
+            }
+            locals.herokuAppProcesses = JSON.parse(body);
+            callback();
+          });
+        },
+        getHerokuAppReleases: function (herokuApp, callback) {
+          herokuClient.listReleases(herokuApp, function (err, body) {
+            if(err) {
+              console.log(err);
+              return callback(err);
+            }
+            locals.herokuAppReleases = JSON.parse(body);
+            callback();
+          });
+        },
+        getHerokuAppAddons: function (herokuApp, callback) {
+          herokuClient.listAddonsInstalled(herokuApp, function (err, body) {
+            if(err) {
+              console.log(err);
+              return callback(err);
+            }
+            locals.herokuAppAddons = JSON.parse(body);
+            callback();
+          });
+        },
+        getHerokuAppConfigVars: function (herokuApp, callback) {
+          herokuClient.listConfigVars(herokuApp, function (err, body) {
+            if(err) {
+              console.log(err);
+              return callback(err);
+            }
+            locals.herokuAppConfigVars = JSON.parse(body);
+            callback();
+          });
+        }
+      };
+      var walk = function (array) {
+        var asyncMethod = array.shift();
+        if(typeof async[asyncMethod] !== "function") {
+          throw new Error("Invalid method "+asyncMethod);
+        }
+        switch(asyncMethod) {
+          case "parallel":
+          case "series":
+            var funcs = [];
+            var next;
+            while(array.length) {
+              next = array.shift();
+              if(methods[next]) {
+                funcs.push(methods[next]);
+              } else if(Array.isArray(next)) {
+                funcs.push(walk(next));
+              } else {
+                (function () {
+                  var varChain = next.split(":");
+                  var method = varChain.shift();
+                  varChain = varChain[0].split(".");
+                  funcs.push(function (callback) {
+                    var fromArg;
+                    switch(varChain.shift()) {
+                      case "locals":
+                        fromArg = locals;
+                        break;
+                      case "options":
+                        fromArg = options;
+                        break;
+                    }
+                    while(varChain.length) {
+                      fromArg = fromArg[varChain.shift()];
+                    }
+                    methods[method](fromArg, callback);
+                  });
+                })();
+              }
+            }
+            return function (callback) {
+              async[asyncMethod](funcs, function (err) {
+                if(err) {
+                  console.log(err);
+                  return callback(err);
+                }
+                callback();
+              });
+            };
+          case "map":
+            var varChain = array.shift().split(".");
+            var iterator = array.shift();
+            var option;
+            if(methods[iterator]) {
+              option = iterator.substr(3,1).toLowerCase()+iterator.substr(4);
+            } else {
+              throw new Error("Invalid method "+iterator);
+            }
+            return function (callback) {
+              var fromArray;
+              switch(varChain.shift()) {
+                case "locals":
+                  fromArray = locals;
+                  break;
+                case "options":
+                  fromArray = options;
+                  break;
+              }
+              while(varChain.length) {
+                fromArray = fromArray[varChain.shift()];
+              }
+              async[asyncMethod](fromArray, function (from, callback) {
+                methods[iterator](from, function (err) {
+                  if(err) {
+                    console.log(err);
+                    return callback(err);
+                  }
+                  return callback(null, locals[option]);
+                });
+              }, function (err, array) {
+                if(err) {
+                  console.log(err);
+                  return callback(err);
+                }
+                locals[option] = array;
+                callback();
+              });
+            };
+          default:
+            throw new Error("Unsupported method "+asyncMethod);
+        }
+      };
+      try {
+        (walk(asyncMethods))(function (err) {
+          if(err) {
+            console.log(err);
+            return callback(err);
+          }
+          callback(null, locals);
+        });
+      } catch(err) {
+        console.log(err);
+        return callback(err);
+      }
+    };
+
     cc.get( '/favicon.ico', function( req, res, next ) {
       return res.send(404, '');
     });
@@ -170,125 +440,65 @@
     });
 
     cc.get( '/', function( req, res, next ) {
-      var _users,
-          _projects,
-          _clientOf,
-          maybeEnd = function () {
-            if(typeof _users !== "undefined" && typeof _projects !== "undefined" && typeof _clientOf !== "undefined") {
-              var auth = req.session.type==="admin";
-              var perm = auth||req.session.type==="employee";
-              var locals = { title:'dashboard',
-                             name:req.session.name,
-                             auth:auth,
-                             perm:perm,
-                             users:_users || [],
-                             projects:_projects || [],
-                             clientOf:_clientOf || [] };
-              res.render( 'dashboard', locals );
-            }
-          };
-      async.parallel([
-        function (callback) {
-          users.getAllUsers(function( err, array ) {
-            if(err) {
-              console.log(err);
-              res.send(500);
-              callback(err);
-            } else {
-              _users = array;
-              callback();
-            }
-          });
-        }, function (callback) {
-          projects.getAllProjects(function( err, array ) {
-            if(err) {
-              console.log(err);
-              res.send(500);
-              callback(err);
-            } else {
-              _projects = array;
-              callback();
-            }
-          });
-        }, function (callback) {
-          projects.getProjectsForUser( req.session.name, function (err, array) {
-            if(err) {
-              console.log(err);
-              res.send(500);
-              callback(err);
-            } else {
-              _clientOf = array;
-              callback();
-            }
-          });
-        }], function (err) {
-          if(err) {
-            console.log(err);
-          } else {
-          	maybeEnd();
-          }
-        });
+      var asyncMethods = [
+        "parallel",
+        "getAllUsers",
+        "getAllProjects",
+        "getUserProjects:options.projectUser"
+      ];
+      var options = {
+        "projectUser":req.session.name
+      };
+      var callback = function (err, locals) {
+        if(err) {
+          console.log(err);
+          return res.send(500);
+        }
+        var auth = req.session.type==="admin";
+        var perm = auth||req.session.type==="employee";
+        locals = { 
+          title:'dashboard',
+          name:req.session.name,
+          auth:auth,
+          perm:perm,
+          users:locals.allUsers || [],
+          projects:locals.allProjects || [],
+          clientOf:locals.userProjects || []
+        };
+        res.render( 'dashboard', locals );
+      };
+      getLocals(asyncMethods, options, callback);
     });
 
     cc.get( '/dashboard', function( req, res, next ) {
-      var _users,
-          _projects,
-          _clientOf,
-          maybeEnd = function () {
-            if(typeof _users !== "undefined" && typeof _projects !== "undefined" && typeof _clientOf !== "undefined") {
-              var auth = req.session.type==="admin";
-              var perm = auth||req.session.type==="employee";
-              var locals = { title:'dashboard',
-                             name:req.session.name,
-                             auth:auth,
-                             perm:perm,
-                             users:_users || [],
-                             projects:_projects || [],
-                             clientOf:_clientOf || [] };
-              res.render( 'dashboard', locals );
-            }
-          };
-      async.parallel([
-        function (callback) {
-          users.getAllUsers(function( err, array ) {
-            if(err) {
-              console.log(err);
-              res.send(500);
-              callback(err);
-            } else {
-              _users = array;
-              callback();
-            }
-          });
-        }, function (callback) {
-          projects.getAllProjects(function( err, array ) {
-            if(err) {
-              console.log(err);
-              res.send(500);
-              callback(err);
-            } else {
-              _projects = array;
-              callback();
-            }
-          });
-        }, function (callback) {
-          projects.getProjectsForUser( req.session.name, function (err, array) {
-            if(err) {
-              console.log(err);
-              res.send(500);
-              callback(err);
-            } else {
-              _clientOf = array;
-              callback();
-            }
-          });
-        }], function (err) {
-          if(err) {
-            console.log(err);
-          } else {
-            maybeEnd();
-          }
-        });
+      var asyncMethods = [
+        "parallel",
+        "getAllUsers",
+        "getAllProjects",
+        "getUserProjects:options.projectUser"
+      ];
+      var options = {
+        "projectUser":req.session.name
+      };
+      var callback = function (err, locals) {
+        if(err) {
+          console.log(err);
+          return res.send(500);
+        }
+        var auth = req.session.type==="admin";
+        var perm = auth||req.session.type==="employee";
+        locals = { 
+          title:'dashboard',
+          name:req.session.name,
+          auth:auth,
+          perm:perm,
+          users:locals.allUsers || [],
+          projects:locals.allProjects || [],
+          clientOf:locals.userProjects || []
+        };
+        res.render( 'dashboard', locals );
+      };
+      getLocals(asyncMethods, options, callback);
     });
 
     cc.post( '/addUser', function( req, res, next ) {
@@ -300,151 +510,105 @@
     });
 
     cc.get( '/projects/:uri', function( req, res, next ) {
-      var clients,
-          project,
-          files,
-          herokuApps,
-          maybeEnd = function () {
-            if(typeof clients !== "undefined" && typeof project !== "undefined" && typeof files !== "undefined" && typeof herokuApps !== "undefined") {
-              var auth = req.session.type==="admin";
-              var perm = auth||req.session.type==="employee";
-              var isClient = project[0].users.indexOf(req.session.name)>=0;
-              if(!auth&&!perm&&!isClient) {
-                return res.send(401);
-              }
-              var bcrypt = require( 'bcrypt' );
-              var salt = bcrypt.genSaltSync(10);
-              var hash = bcrypt.hashSync(project[0].container||"", salt);
-              clients = clients.filter( function( val ) {
-                return project[0].users.indexOf(val.name)<0;
-              });
-              herokuApps = herokuApps.filter( function( val ) {
-                return project[0].herokuApps.map(function (app) {
-                  return app.name;
-                }).indexOf(val.name)<0;
-              });
-              console.log(project[0].herokuApps);
-              var locals = { project: { name: project[0].name,
-                                        users: project[0].users || [],
-                                        uri: project[0].uri,
-                                        sharingEnabled: project[0].sharingEnabled,
-                                        container: project[0].container,
-                                        hash: hash,
-                                        herokuApps: project[0].herokuApps
-                                      },
-                             name:req.session.name,
-                             auth:auth,
-                             perm:perm,
-                             isClient:isClient,
-                             clients:clients,
-                             files:files,
-                             herokuApps:herokuApps };
-              res.render( 'project', locals );
-            }
-          };
-      async.parallel([
-        function (callback) {
-          users.getAllClients( function( err, array ) {
-            if(err) {
-              console.log(err);
-              res.send(500);
-              return callback(err);
-            }
-            clients = array;
-            callback();
-          });
-        }, function (callback) {
-          projects.find( req.params.uri, function( err, obj ) {
-            if(err) {
-              console.log(err);
-              res.send(500);
-              return callback(err);
-            }
-            project = obj;
-            async.parallel([function (callback) {
-                async.map(project[0].herokuApps, function (appName, callback) {
-                  herokuClient.listProcesses(appName, callback);
-                }, function (err, processes) {
-                  if(err) {
-                    console.log(err);
-                    res.send(500);
-                    return callback(err);
-                  }
-                  processes = processes.map(function (processes) {
-                    return JSON.parse(processes);
-                  });
-                  project[0].herokuApps = project[0].herokuApps.map(function (appName, index) {
-                    var app = {
-                      name:appName
-                    };
-                    app.processes = processes[index];
-                    switch(app.processes.length) {
-                      case 0:
-                        app.status = "0 processes";
-                        break;
-                      case 1:
-                        app.status = app.processes[0].pretty_state;
-                        break;
-                      default:
-                        var states = {};
-                        app.processes.forEach(function (process) {
-                          if(typeof states[process.state] === "undefined") {
-                            states[process.state] = 1;
-                          } else {
-                            states[process.state]++;
-                          }
-                        });
-                        app.status = Object.getOwnPropertyNames(states).map(function (state) {
-                          return state+":"+states[state];
-                        }).sort().join(", ");
-                        break;
-                    }
-                    return app;
-                  });
-                  callback();
-                });
-              }, function (callback) {
-                projects.getFiles( project[0], function( err, array ) {
-                  if(err) {
-                    console.log(err);
-                    res.send(500);
-                    return callback(err);
-                  }
-                  files = array;
-                  callback();
-                });
-            }], function (err) {
-              if(err) {
-                console.log(err);
-                res.send(500);
-                return callback(err);
-              }
-              callback();
-            });
-          });
-        }, function (callback) {
-          herokuClient.listApps(function (err, json) {
-            if(err) {
-              console.log(err);
-              res.send(500);
-              return callback(err);
-            }
-            try {
-              herokuApps = JSON.parse(json);
-              callback();
-            } catch(err) {
-              console.log(err);
-              res.send(500);
-              return callback(err);
-            }
-          });
-        }], function (err) {
-          if(err) {
-            console.log(err);
-          } else {
-          	maybeEnd();
-          }
+      var asyncMethods = [
+        "parallel",
+        "getAllClients",
+        "getAllUsers",
+        "getAllProjects",
+        "getUserProjects:options.projectUser",
+        [
+          "series",
+          "getProject:options.projectUri",
+          [
+            "parallel",
+            [
+              "map",
+              "locals.project.herokuApps",
+              "getHerokuAppProcesses"
+            ],
+            "getProjectFiles:locals.project"
+          ]
+        ],
+        "getAllHerokuApps"
+      ];
+      var options = {
+        "projectUri":req.params.uri,
+        "projectUser":req.session.name
+      };
+      var callback = function (err, locals) {
+        if(err) {
+          console.log(err);
+          return res.send(500);
+        }
+        var auth = req.session.type==="admin";
+        var perm = auth||req.session.type==="employee";
+        var isClient = locals.project.users.indexOf(req.session.name)>=0;
+        if(!auth&&!perm&&!isClient) {
+          return res.send(401);
+        }
+        var bcrypt = require( 'bcrypt' );
+        var salt = bcrypt.genSaltSync(10);
+        var hash = bcrypt.hashSync(locals.project.container||"", salt);
+        var clients = locals.allClients.filter( function( val ) {
+          return locals.project.users.indexOf(val.name)<0;
         });
+        locals.project.herokuApps = locals.project.herokuApps.map(function (appName, index) {
+          var app = {
+            name:appName
+          };
+          app.processes = locals.herokuAppProcesses[index];
+          switch(app.processes.length) {
+            case 0:
+              app.status = "0 processes";
+              break;
+            case 1:
+              app.status = app.processes[0].pretty_state;
+              break;
+            default:
+              var states = {};
+              app.processes.forEach(function (process) {
+                if(typeof states[process.state] === "undefined") {
+                  states[process.state] = 1;
+                } else {
+                  states[process.state]++;
+                }
+              });
+              app.status = Object.getOwnPropertyNames(states).map(function (state) {
+                return state+": "+states[state];
+              }).sort().join(", ");
+              break;
+          }
+          return app;
+        });
+        var herokuApps = locals.allHerokuApps.filter( function( val ) {
+          return locals.project.herokuApps.map(function (app) {
+            return app.name;
+          }).indexOf(val.name)<0;
+        });
+        locals = { 
+          project: { 
+            name: locals.project.name,
+            users: locals.project.users || [],
+            uri: locals.project.uri,
+            sharingEnabled: locals.project.sharingEnabled,
+            container: locals.project.container,
+            hash: hash,
+            herokuApps: locals.project.herokuApps,
+          },
+          name:req.session.name,
+          auth:auth,
+          perm:perm,
+          isClient:isClient,
+          users: locals.allUsers,
+          projects: locals.allProjects,
+          clientOf: locals.userProjects,
+          clients:clients,
+          files:locals.projectFiles,
+          herokuApps:herokuApps
+        };
+        res.render( 'project', locals );
+      };
+      getLocals(asyncMethods, options, callback);
     });
 
     cc.post( '/projects/:uri/addUser', function( req, res, next ) {
@@ -480,129 +644,91 @@
     });
     
     cc.get( '/herokuApps/:name', function( req, res, next ) {
-    	var json,
-    			logplex,
-          domains,
-          processes,
-    			complete = function (err) {
-    				try {
-              domains = JSON.parse(domains);
-              processes = JSON.parse(processes);
-							var info = JSON.parse(json);
-							var auth = req.session.type==="admin";
-							var perm = auth||req.session.type==="employee";
-							var locals = {
-								list: Object.getOwnPropertyNames(info).filter(function (prop) {
-									switch(typeof info[prop]) {
-										case "undefined":
-											return false;
-										case "object":
-										case "string":
-											return !!info[prop];
-										default:
-											return true;
-									}
-								}).map(function (prop) {
-									var val;
-									if(prop === "domain_name") {
-										val = info[prop].domain;
-									} else {
-										val = info[prop];
-									}
-									return {
-										name:prop,
-										value:val
-									};
-								}),
-								dict: info,
-                domains: domains.map(function (domain) {
-                  return {
-                    properties: Object.getOwnPropertyNames(domain).filter(function (prop) {
-                      return !!domain[prop]&&prop!=="domain";
-                    }).map(function (prop) {
-                      return {
-                        name:prop,
-                        value:domain[prop]
-                      };
-                    }),
-                    name: domain["domain"]
-                  };
-                }),
-                processes: processes.map(function (process) {
-                  return {
-                    properties: Object.getOwnPropertyNames(process).filter(function (prop) {
-                      return (!!process[prop]||typeof process[prop]==="boolean")&&prop!=="process";
-                    }).map(function (prop) {
-                      return {
-                        name:prop,
-                        value:process[prop].toString()
-                      };
-                    }),
-                    name: process["process"],
-                    up: (process["state"]==="up"),
-                    idle: (process["state"]==="idle"),
-                    down: (process["state"]==="down")
-                  };
-                }),
-								logplex: logplex,
-								name: req.session.name,
-								auth: auth,
-								perm: perm
-							};
-							res.render( 'herokuStatus', locals );
-						} catch(err) {
-							console.log(err);
-							return res.send(500);
+      var asyncMethods = [
+        "parallel",
+        "getAllUsers",
+        "getAllProjects",
+        "getUserProjects:options.projectUser",
+        "getHerokuApp:options.herokuApp",
+        "getHerokuAppLogs:options.herokuApp",
+        "getHerokuAppDomains:options.herokuApp",
+        "getHerokuAppProcesses:options.herokuApp"
+      ];
+      var options = {
+        projectUser:req.session.name,
+        herokuApp:req.params.name
+      };
+    	var callback = function (err, locals) {
+        if(err) {
+          console.log(err);
+          return res.send(500);
+        }
+        var domains = locals.herokuAppDomains;
+        var processes = locals.herokuAppProcesses;
+				var info = locals.herokuApp;
+				var auth = req.session.type==="admin";
+				var perm = auth||req.session.type==="employee";
+				locals = {
+					list: Object.getOwnPropertyNames(info).filter(function (prop) {
+						switch(typeof info[prop]) {
+							case "undefined":
+								return false;
+							case "object":
+							case "string":
+								return !!info[prop];
+							default:
+								return true;
 						}
-					};
-			async.parallel([function (callback) {
-					herokuClient.getInfo( req.params.name, function (err, body) {
-						if(err) {
-							console.log(err);
-							res.send(500);
-							return callback(err);
+					}).map(function (prop) {
+						var val;
+						if(prop === "domain_name") {
+							val = info[prop].domain;
+						} else {
+							val = info[prop];
 						}
-						json = body;
-						callback();
-					});
-				}, function (callback) {
-					herokuClient.getLogs( req.params.name, 100, null, null, null, function (err, body) {
-						if(err) {
-							console.log(err);
-							res.send(500);
-							return callback(err);
-						}
-						logplex = body;
-						callback();
-					});
-				}, function (callback) {
-          herokuClient.listDomains( req.params.name, function (err, body) {
-            if(err) {
-              console.log(err);
-              res.send(500);
-              return callback(err);
-            }
-            domains = body;
-            callback();
-          });
-        }, function (callback) {
-          herokuClient.listProcesses( req.params.name, function (err, body) {
-            if(err) {
-              console.log(err);
-              res.send(500);
-              return callback(err);
-            }
-            processes = body;
-            callback();
-          });
-        }], function (err) {
-					if(err) {
-						console.log(err);
-						return;
-					} else {
-						complete();
-					}
-			});
+						return {
+							name:prop,
+							value:val
+						};
+					}),
+					dict: info,
+          domains: domains.map(function (domain) {
+            return {
+              properties: Object.getOwnPropertyNames(domain).filter(function (prop) {
+                return !!domain[prop]&&prop!=="domain";
+              }).map(function (prop) {
+                return {
+                  name:prop,
+                  value:domain[prop]
+                };
+              }),
+              name: domain["domain"]
+            };
+          }),
+          processes: processes.map(function (process) {
+            return {
+              properties: Object.getOwnPropertyNames(process).filter(function (prop) {
+                return (!!process[prop]||typeof process[prop]==="boolean")&&prop!=="process";
+              }).map(function (prop) {
+                return {
+                  name:prop,
+                  value:process[prop].toString()
+                };
+              }),
+              name: process["process"]
+            };
+          }),
+					logplex: locals.herokuAppLogs,
+					name: req.session.name,
+					auth: auth,
+					perm: perm,
+          users: locals.allUsers,
+          projects: locals.allProjects,
+          clientOf: locals.userProjects
+				};
+				res.render( 'herokuStatus', locals );
+			};
+			getLocals(asyncMethods, options, callback);
     });
     
     cc.get( '/herokuApps/:name/logs', function ( req, res, next ) {
@@ -625,6 +751,8 @@
             res.send(200);
           }
         });
+      } else {
+      	res.send(500);
       }
     });
 
@@ -639,52 +767,55 @@
             res.send(200);
           }
         });
+      } else {
+      	res.send(500);
       }
     });
 
     cc.get( '/users/:uri', function( req, res, next ) {
-      var user;
-      async.series([function (callback) {
-        users.find(req.params.uri, function (err, array) {
-          if(err) {
-            console.log(err);
-            res.send(500);
-            return callback(err);
+      var asyncMethods = [
+        "parallel",
+        "getAllUsers",
+        "getAllProjects",
+        [
+          "series",
+          "getUser:options.userId",
+          "getUserProjects:locals.user.name"
+        ]
+      ];
+      var options = {
+        userId:req.params.uri
+      };
+      var callback = function (err, locals) {
+        if(err) {
+          console.log(err);
+          return res.send(500);
+        }
+        var projects = locals.userProjects.map(function (project) {
+          if(Array.isArray(project.users) && project.users) {
+            project.users = project.users.map(function (user) {
+              return {
+                name: user,
+                id: sanitize(user).toLowerCase()
+              };
+            });
           }
-          user = array[0];
-          callback();
+          return project;
         });
-      }, function (callback) {
-        projects.getProjectsForUser(user.name, function (err, array) {
-          if(err) {
-            console.log(err);
-            res.send(500);
-            return callback(err);
-          }
-          var projects = array.map(function (project) {
-            if(Array.isArray(project.users) && project.users) {
-              project.users = project.users.map(function (user) {
-                return {
-                  name: user,
-                  id: sanitize(user).toLowerCase()
-                };
-              });
-            }
-            return project;
-          });
-          var auth = req.session.type==="admin";
-          var perm = auth||req.session.type==="employee";
-          var locals = {
-            name: req.session.name,
-            auth: auth,
-            perm: perm,
-            user: user||{},
-            projects: projects||[]
-          };
-          res.render( 'userStats', locals );
-          callback();
-        });
-      }]);
+        var auth = req.session.type==="admin";
+        var perm = auth||req.session.type==="employee";
+        locals = {
+          name: req.session.name,
+          auth: auth,
+          perm: perm,
+          user: locals.user||{},
+          userProjects: projects||[],
+          projects: locals.allProjects||[],
+          users: locals.allUsers||[]
+        };
+        res.render( 'userStats', locals );
+      };
+      getLocals(asyncMethods, options, callback);
     });
     
     log.info( "ROUTES: SUCCESS" );
