@@ -48,7 +48,7 @@ Projects.prototype.addProject = function( req, res, next ) {
 
 Projects.prototype.find = function( uri, callback ) {
   var self = this;
-  self._projects.find( { uri:uri }, { name:1, users:1, uri:1, sharingEnabled:1, container:1, herokuApps:1 } ).toArray( callback );
+  self._projects.find( { uri:uri }, { name:1, users:1, uri:1, sharingEnabled:1, container:1, herokuApps:1, herokuEnabled:1 } ).toArray( callback );
 };
 
 Projects.prototype.getAllProjects = function( callback ) {
@@ -120,6 +120,20 @@ Projects.prototype.enableSharing = function( req, res, next ) {
   });
 };
 
+Projects.prototype.enableHeroku = function( req, res, next ) {
+  var self = this;
+  self.find( req.params.uri, function( err, projects ) {
+    if (projects && projects[0] ) {
+      self._projects.update( { name:projects[0].name }, { '$set': { herokuEnabled:true } }, function( err ) {
+        if (err) {
+          console.log( err );
+        }
+        res.redirect( '/projects/'+req.params.uri );
+      });
+    }
+  });
+};
+
 Projects.prototype.uploadFile = function( req, res, next ) {
   var self = this,
       form = new IncomingForm,
@@ -130,9 +144,6 @@ Projects.prototype.uploadFile = function( req, res, next ) {
       pending = 0,
       sent = 0,
       socket;
-  form.on("progress", function (received, expected) {
-    total = expected;
-  });
   form.onPart = function(part) {
     if(!part.filename) {
       form.handlePart(part);

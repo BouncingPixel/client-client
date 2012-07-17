@@ -3,144 +3,173 @@
   <head>
   	<title>Project :: {project.name}</title>
   	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-  	<link href="/css/bootstrap.css" rel="stylesheet">
+  	<link type="text/css" href="/css/bootstrap.css" rel="stylesheet">
+  	<link type="text/css" href="/css/bootstrap-responsive.css" rel="stylesheet">
   	<!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
   	<!--[if lt IE 9]>
       <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
     <script type="text/javascript" src="/socket.io/socket.io.js"></script>
-    <script type="text/javascript" src="/scripts/jquery-1.7.2.min.js"></script>
-    <script type="text/javascript" src="/scripts/project.js"></script>
+    <script type="text/javascript" src="/js/jquery-1.7.2.min.js"></script>
+  	<script type="text/javascript" src="/js/bootstrap.js"></script>
+    <script type="text/javascript" src="/js/project.js"></script>
   </head>
   <body>
-  	<div id="overlay" style="position:absolute;left:0px;right:0px;top:0px;bottom:0px;z-index:8001;display:none;background-color:hsla(0,100%,100%,0.6)">
-  	  <div class="alert alert-info span5" style="position:absolute;z-index:9001;left:50%;margin-left:-235px;height:128px;top:50%;margin-top:-64px;box-shadow: 6px 6px 8px hsla(0, 0%, 0%, 0.2)">
-  		<button class="close" onclick="hide()">&times;</button>
-  	  	<h4>Settings :: <span id="alert-name"></span></h4>
-  		<form method="POST" id="alert-form">
-  		  <input type="hidden" name="container" value="{project.container}">
-	  	  <input type="hidden" name="hash" value="{project.hash}">
-	  	  <div style="display:none;position:absolute;top:50%;margin-top:-9px;left:50%;margin-left:-150px;width:300px" class="progress progress-striped active" id="alert-progress">
-	  	  	<div class="bar" style="width:0%;z-index:9001;border-radius:4px;-moz-border-radius:4px;-webkit-border-radius:4px" id="alert-bar"></div>
-	  	  </div>
-  		  <span style="position:absolute;top:50%;margin-top:-18px;left:50%;margin-left:-145px" id="alert-input">
-  		  	New name: <input class="input" type="text" name="name" autocomplete="off">
-  		  </span>
-  		  <br />
-  		  <button class="btn" style="position:absolute;bottom:10px;left:50%;margin-left:-50px" onclick="sendReq(event)">Update name</button>
-  		</form>
+  	<div class="modal hide fade" id="overlay" style="text-align:center">
+  		<div class="modal-header">
+  			<button class="close" data-dismiss="modal">&times;</button>
+  	  	<h3>Settings :: <span id="alert-name"></span></h3>
+  	  </div>
+  	  <div class="modal-body">
+	  		<form method="POST" id="alert-form">
+	  		  <input type="hidden" name="container" value="{project.container}">
+		  	  <input type="hidden" name="hash" value="{project.hash}">
+		  	  <div style="display:none" class="progress progress-striped active" id="alert-progress">
+		  	  	<div class="bar" style="width:0%" id="alert-bar"></div>
+		  	  </div>
+	  		  <span id="alert-input">
+	  		  	New name: <input class="input" type="text" name="name" autocomplete="off">
+	  		  </span>
+	  		</form>
+  	  </div>
+  	  <div class="modal-footer">
+  	  	<button type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
+  	  	<button type="button" class="btn btn-primary" onclick="sendReq(event)">Update name</button>
   	  </div>
   	</div>
-  	<div class="container">
-  	  {>"views/contents.dust"/}
-  	  <div class="row">
-  		<div class="span4 offset4 well" style="text-align:center;">
-  		  {>"views/user.dust"/}
-  		</div>
-  	  </div>
-	  <div class="row">
-	  	<div class="span6 offset3 well" style="text-align:center;">
-		  Project<br />
-		  {#project auth=auth}
-		    {name}
+  	<div class="container-fluid">
+  		<div class="row-fluid">
+  	  	{>"views/contents.dust"/}
+  	  	<div class="span9">
+		  	  <div class="row-fluid">
+		  	  	<div class="span2"></div>
+			  		<div class="span4 well" style="text-align:center;">
+			  		  {>"views/user.dust"/}
+			  		</div>
+		  	  </div>
+				  <div class="row-fluid">
+				  	<div class="span1"></div>
+				  	<div class="span6 well" style="text-align:center;">
+						  <div class="nav">
+						  	<span class="nav-header">
+						  		<h4>Project</h4>
+						  	</span>
+						  	{#project}
+						    <h6>{name}</h6>
+						  </div>
+						</div>
+				  </div>
+				  <div class="row-fluid">
+				  	<div class="span1"></div>
+						<div class="span6 well" style="text-align:center;">
+							<div class="nav">
+								<h6>Users</h6>
+							</div>
+							{?auth}
+							  {#project}
+								{>"views/joinUser.dust"/}
+							  {/project}
+							{/auth}
+						    {?users}
+						      <ul>
+							  	{#users uri=uri auth=auth}
+								  <li style="text-align:left">
+								  	{.}
+								  	{?auth}
+								  	  <form method="POST" action="/projects/{uri}/removeUser" style="display:inline"> 
+								  	  	<input type="hidden" name="name" value="{.}">
+								  		<button type="submit" class="btn btn-mini"><span style="font-weight:bold">&times;</span></button>
+									  </form>
+									{/auth}
+								  </li>
+								{/users}
+							  </ul>
+						    {:else}
+						      No users!
+						    {/users}
+						  {/project}
+						</div>
+				  </div>
+				  <div class="row-fluid">
+				  	<div class="span1"></div>
+				  	<div class="span6 well" style="text-align:center">
+				  	  <div class="nav">
+				  	  	<h6>Heroku Apps</h6>
+				  	  </div>
+				  	  {?project.herokuEnabled}
+				  	  	{?auth}
+				  	  <form action="/projects/{project.uri}/addHerokuApp" method="POST" class="form-inline">
+				  	  	Name: <select name="appName" {^herokuApps}disabled="disabled"{/herokuApps}>
+				  	  			{#herokuApps}
+				  	  			<option>{.name}</option>
+				  	  			{/herokuApps}
+				  	  		  </select>
+				  		<br/>
+				  		<br/>
+				  	  	<button type="submit" class="btn">Add Heroku App</button>
+				  	  </form>
+				  	  	{/auth}
+				  	  	{?project.herokuApps}
+				  	  	{>"views/herokuApps.dust"/}
+				  	  	{:else}
+				  	  	No heroku apps!
+				  	  	{/project.herokuApps}
+				  	  {:else}
+				  	  	{?auth}
+				  	  <form action="/projects/{project.uri}/enableHeroku" method="POST" class="form-inline">
+				  	  	<button type="submit" class="btn">Enable Heroku</button>
+				  	  </form>
+				  	  	{:else}
+				  	  Heroku Disabled
+				  	  	{/auth}
+				  	  {/project.herokuEnabled}
+				  	</div>
+				  </div>
+		  	  <div class="row-fluid">
+		  	  	<div class="span1"></div>
+		  	    <div class="span6 well" style="text-align:center;">
+		  	      <div class="nav">
+		  	      	<h6>File Sharing</h6>
+		  	      </div>
+		  	      {?auth}
+		  		  <form action="/projects/{project.uri}/enableSharing" method="POST" style="display:inline-block">
+		  		    <input type="checkbox" id="canFileShare"
+		  		    {?project.sharingEnabled}
+		  			  checked="checked" disabled="disabled"> Sharing Enabled
+		  		    {:else}
+		  			  onclick="disable( event );"> Enable Sharing
+		  		    {/project.sharingEnabled}
+		  		  </form>
+		  		  <br/>
+		  		  {/auth}
+		  		  {?project.sharingEnabled}
+		  		    <form action="/projects/{project.uri}/upload" method="POST" enctype="multipart/form-data" id="file-upload-form" name="file-upload-form" style="display:inline-block">
+		  		      <input type="hidden" name="container" value="{project.container}">
+		  		  	  <input type="hidden" name="hash" value="{project.hash}">
+		  		  	  <div id="progress-bars" style="display:none">
+		  		  		Upload Progress:
+			  		  	<div class="progress progress-striped progress-info active" id="upload-progress">
+			  		  	  <div class="bar" style="width:0%" id="upload-bar"></div>
+			  		  	</div>
+			  		  	Send Progress:
+			  		  	<div class="progress progress-striped progress-success active" id="send-progress">
+			  		  	  <div class="bar" style="width:0%" id="send-bar"></div>
+			  		  	</div>
+			  		  </div>
+		  			  <input type="file" class="input" name="file" multiple="true">
+		  			  <button class="btn btn-mini" onclick="upload(event);" id="upload-btn"><i class="icon-upload"></i></button>
+		  		    </form>
+		  		    <br/>
+		  		    {>"views/cloudFiles.dust"/}
+		  		  {:else}
+		  		  	{^auth}
+		  		  	  Sharing Disabled
+		  		  	{/auth}
+		  		  {/project.sharingEnabled}
+		  	    </div>
+		  	  </div>
+		  	</div>
+		  </div>
 		</div>
-	  </div>
-	  <div class="row">
-		<div class="span6 offset3 well" style="text-align:center;">
-			Users
-			<br/>
-			<br/>
-			{?auth}
-			  {#project}
-				{>"views/joinUser.dust"/}
-			  {/project}
-			{/auth}
-		    {?users}
-		      <ul>
-			  	{#users uri=uri auth=auth}
-				  <li style="text-align:left">
-				  	{.}
-				  	{?auth}
-				  	  <form method="POST" action="/projects/{uri}/removeUser" style="display:inline"> 
-				  	  	<input type="hidden" name="name" value="{.}">
-				  		<button type="submit" class="btn btn-mini"><span style="font-weight:bold">&times;</span></button>
-					  </form>
-					{/auth}
-				  </li>
-				{/users}
-			  </ul>
-		    {:else}
-		      No users!
-		    {/users}
-		  {/project}
-		</div>
-	  </div>
-	  <div class="row">
-	  	<div class="span6 offset3 well" style="text-align:center">
-	  	  Heroku Apps
-	  	  <br/>
-	  	  <br/>
-	  	  {?auth}
-	  	  <form action="/projects/{project.uri}/addHerokuApp" method="POST" class="form-inline">
-	  	  	Name: <select name="appName" {^herokuApps}disabled="disabled"{/herokuApps}>
-	  	  			{#herokuApps}
-	  	  			<option>{.name}</option>
-	  	  			{/herokuApps}
-	  	  		  </select>
-	  		<br/>
-	  		<br/>
-	  	  	<button type="submit" class="btn">Add Heroku App</button>
-	  	  </form>
-	  	  {/auth}
-	  	  {?project.herokuApps}
-	  	  	{>"views/herokuApps.dust"/}
-	  	  {:else}
-	  	  	No heroku apps!
-	  	  {/project.herokuApps}
-	  	</div>
-	  </div>
-  	  <div class="row">
-  	    <div class="span6 offset3 well" style="text-align:center;">
-  	      File Sharing
-  	      <br/>
-  	      <br/>
-  	      {?auth}
-  		  <form action="/projects/{project.uri}/enableSharing" method="POST" style="display:inline-block">
-  		    <input type="checkbox" id="canFileShare"
-  		    {?project.sharingEnabled}
-  			  checked="checked" disabled="disabled"> Sharing Enabled
-  		    {:else}
-  			  onclick="disable( event );"> Enable Sharing
-  		    {/project.sharingEnabled}
-  		  </form>
-  		  <br/>
-  		  {/auth}
-  		  {?project.sharingEnabled}
-  		    <form action="/projects/{project.uri}/upload" method="POST" enctype="multipart/form-data" id="file-upload-form" name="file-upload-form" style="display:inline-block">
-  		      <input type="hidden" name="container" value="{project.container}">
-  		  	  <input type="hidden" name="hash" value="{project.hash}">
-  		  	  <div id="progress-bars" style="display:none">
-  		  		Upload Progress:
-	  		  	<div class="progress progress-striped progress-info active" id="upload-progress">
-	  		  	  <div class="bar" style="width:0%" id="upload-bar"></div>
-	  		  	</div>
-	  		  	Send Progress:
-	  		  	<div class="progress progress-striped progress-success active" id="send-progress">
-	  		  	  <div class="bar" style="width:0%" id="send-bar"></div>
-	  		  	</div>
-	  		  </div>
-  			  <input type="file" class="input" name="file" multiple="true">
-  			  <button class="btn btn-mini" onclick="upload(event);" id="upload-btn"><i class="icon-upload"></i></button>
-  		    </form>
-  		    <br/>
-  		    {>"views/cloudFiles.dust"/}
-  		  {:else}
-  		  	{^auth}
-  		  	  Sharing Disabled
-  		  	{/auth}
-  		  {/project.sharingEnabled}
-  	    </div>
-  	  </div>
-	</div>
   </body>
 </html>

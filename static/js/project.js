@@ -11,17 +11,10 @@ var disable = function(e) {
 	}
 };
 
-var hide = function() {
-	document.getElementById("overlay").style.display = "none";
-	document.body.style.overflow = "auto";
-};
-
 var settings = function(path, name) {
 	document.getElementById("alert-form").action = path;
 	document.getElementById("alert-name").innerHTML = unescape(name);
-	document.getElementById("overlay").style.display = "block";
-	$(document.body).scrollTop("0px");
-	document.body.style.overflow = "hidden";
+	$(document.getElementById("overlay")).modal("show");
 };
 
 var sendReq = function(e) {
@@ -60,11 +53,10 @@ var sendReq = function(e) {
 	};
 	xmlhttp.onerror = xmlhttp.onabort = function(err) {
 		console.log(err);
-		document.getElementById("overlay").style.display = "none";
+		$(document.getElementById("overlay")).modal("hide");
 		div.style.display = "none";
 		span.style.display = "inline";
 		bar.style.width = "0%";
-		document.body.style.overflow = "auto";
 	};
 	xmlhttp.send(params);
 	return false;

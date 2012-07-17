@@ -1,6 +1,6 @@
 {
   "name": "client-client",
-  "version": "0.0.1-46",
+  "version": "0.0.1",
   "dependencies": {
     "mongodb": "*",
     "connect-mongodb": "*",
@@ -24,7 +24,7 @@
     "SUBDOMAIN": "client",
     "PYTHON": "/opt/local/bin/python2.7"
   },
-  "subdomain": "cc",
+  "subdomain": "client-client",
   "engines": {
     "node": "0.6.x"
   },

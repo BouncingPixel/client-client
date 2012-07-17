@@ -69,10 +69,10 @@ Rackspace.prototype.get = function( containerName, imageName, callback ) {
   });
 };
 
-Rackspace.prototype.updateFile = function( containerName, imageName, headers, callback ) {
+Rackspace.prototype.renameFile = function( containerName, imageName, headers, callback ) {
   init( function ( err ) {
     if( err ) { return callback( err ); }
-    _self.client.updateFile( containerName, { remote:imageName, headers: headers }, callback );
+    _self.client.renameFile( containerName, { remote:imageName, headers: headers }, callback );
   });
 }
 

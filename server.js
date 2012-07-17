@@ -594,6 +594,7 @@
             container: locals.project.container,
             hash: hash,
             herokuApps: locals.project.herokuApps,
+            herokuEnabled: locals.project.herokuEnabled
           },
           name:req.session.name,
           auth:auth,
@@ -621,6 +622,10 @@
 
     cc.post( '/projects/:uri/enableSharing', function( req, res, next ) {
       projects.enableSharing( req, res, next );
+    });
+
+    cc.post( '/projects/:uri/enableHeroku', function( req, res, next ) {
+      projects.enableHeroku( req, res, next );
     });
 
     cc.post( '/projects/:uri/upload', function( req, res, next ) {
@@ -804,6 +809,11 @@
         });
         var auth = req.session.type==="admin";
         var perm = auth||req.session.type==="employee";
+        if(locals.user.type==="admin") {
+          locals.user.auth = true;
+        } else if(locals.user.type==="employee") {
+          locals.user.perm = true;
+        }
         locals = {
           name: req.session.name,
           auth: auth,

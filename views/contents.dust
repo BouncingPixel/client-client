@@ -1,62 +1,56 @@
-<div class="span3 well" style="position:absolute;left:0px">
-	<ul class="nav nav-list">
-		<li class="nav-header"><h4>Contents</h4></li>
-		<li class="nav-header">
-			<span style="white-space:nowrap"> 
-				<i class="icon-globe"></i> 
-				Links
-			</span>
-		</li>
-		<li>
-			<a href="/dashboard">Dashboard</a>
-		</li>
-		{?perm}
-			{?users}
-		<li class="nav-header">
-			<span style="white-space:nowrap">
-				<i class="icon-user"></i> 
-				Users
-			</span>
-		</li>
-				{#users auth=auth}
-					{?auth}
-		<li>
-			<a href="/users/{id}">{name}</a>
-		</li>
-					{:else}
-		<li>
-			{name}
-		</li>
-					{/auth}
+<div class="span3">
+	<div class="well">
+		<ul class="nav nav-list">
+			<li class="nav-header"><h4>Contents</h4></li>
+			<li class="nav-header">
+				<span style="white-space:nowrap"> 
+					<i class="icon-globe"></i> 
+					Links
+				</span>
+			</li>
+			<li>
+				<a href="/dashboard">Dashboard</a>
+			</li>
+			{?perm}
+				{?users}
+			<li class="nav-header">
+				<span style="white-space:nowrap">
+					<i class="icon-user"></i> 
+					Users
+				</span>
+			</li>
+					{#users auth=auth}
+						{?auth}
+			<li><a href="/users/{id}">{name}</a></li>
+						{:else}
+			<li>{name}</li>
+						{/auth}
+					{/users}
 				{/users}
-			{/users}
-			{?projects}
-		<li class="nav-header">
-			<span style="white-space:nowrap">
-				<i class="icon-folder-open"></i> 
-				Projects
-			</span>
-		</li>
-				{#projects}
-		<li>
-			<a href="/projects/{.uri}">{.name}</a>
-		</li>
+				{?projects}
+			<li class="nav-header">
+				<span style="white-space:nowrap">
+					<i class="icon-folder-open"></i> 
+					Projects
+				</span>
+			</li>
+					{#projects}
+			<li><a href="/projects/{.uri}">{.name}</a></li>
+					{/projects}
 				{/projects}
-			{/projects}
-		{:else}
-			{?clientOf}
-		<li class="nav-header">
-			<span style="white-space:nowrap">
-				<i class="icon-folder-open"></i> 
-				Your Projects
-			</span>
-		</li>
-				{#clientOf}
-		<li>
-			<a href="/projects/{.uri}">{.name}</a>
-		</li>
+			{:else}
+				{?clientOf}
+			<li class="nav-header">
+				<span style="white-space:nowrap">
+					<i class="icon-folder-open"></i> 
+					Your Projects
+				</span>
+			</li>
+					{#clientOf}
+			<li><a href="/projects/{.uri}">{.name}</a></li>
+					{/clientOf}
 				{/clientOf}
-			{/clientOf}
-		{/perm}
-	</ul>
+			{/perm}
+		</ul>
+	</div>
 </div>
