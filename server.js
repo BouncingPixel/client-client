@@ -445,6 +445,12 @@
       users.authenticate( req, res, next );
     });
 
+    cc.get( '/logout', function( req, res, next ) {
+      req.session.regenerate(function (err) {
+        res.redirect( '/authenticate' );
+      });
+    });
+
     cc.get( '/', function( req, res, next ) {
       var asyncMethods = [
         "parallel",
@@ -783,6 +789,10 @@
       }
     });
 
+    cc.post( '/users/:uri/update', function( req, res, next ) {
+      users.setType(req, res, next);
+    });
+
     cc.get( '/users/:uri', function( req, res, next ) {
       var asyncMethods = [
         "parallel",
@@ -815,9 +825,13 @@
         });
         var auth = req.session.type==="admin";
         var perm = auth||req.session.type==="employee";
+        if(!perm) {
+          return res.send(401);
+        }
         if(locals.user.type==="admin") {
           locals.user.auth = true;
-        } else if(locals.user.type==="employee") {
+        }
+        if(locals.user.auth||locals.user.type==="employee") {
           locals.user.perm = true;
         }
         locals = {

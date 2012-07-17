@@ -1,7 +1,11 @@
 var socket = io.connect();
+
 $(function() {
-	socket.send(document.forms["file-upload-form"].hash.value)
-})
+	try {
+		socket.send(document.forms["file-upload-form"].hash.value);
+	} catch (err) {}
+	$("#projectlist").addClass("in");
+});
 
 var disable = function(e) {
 	var self = document.getElementById( 'canFileShare' );

@@ -7,6 +7,7 @@
   	<link type="text/css" href="/css/bootstrap-responsive.css" rel="stylesheet">
   	<script type="text/javascript" src="/js/jquery-1.7.2.min.js"></script>
   	<script type="text/javascript" src="/js/bootstrap.js"></script>
+  	<script type="text/javascript" src="/js/user.js"></script>
   	<!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
   	<!--[if lt IE 9]>
       <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
@@ -34,17 +35,19 @@
   								User Settings
   							</a>
   						</li>
+  						{^user.perm}
   						<li>
   							<a href="#" data-toggle="tab" data-target="#userprojects">
   								User Projects
   							</a>
   						</li>
+  						{/user.perm}
   					</ul>
   				</div>
   				<div class="row-fluid tab-content">
 				  	<div class="tab-pane active" id="updateuser">
-				  		<div class="span4" style="text-align:center">
-				  			<form class="form-inline" action="/updateUser" method="POST">
+				  		<div style="margin-left:5px">
+				  			<form class="form-inline" action="/users/{user.id}/update" method="POST" name="userForm">
 				  			{?user.auth}
 				  				<input name="type" type="radio" class="input" value="admin" checked="checked" onclick="return false"> Admin 
 									<input name="type" type="radio" class="input" value="employee" onclick="updateType()"> Employee 
@@ -63,40 +66,40 @@
 								</form>
 				  		</div>
 				  	</div>
+				  	{^user.perm}
 						<div class="tab-pane" id="userprojects">
-							<div class="span4" style="text-align:center">
-								{?userProjects}
-								<ul style="text-align:left">
-									{#userProjects}
-									<li>
+							{?userProjects}
+							<ul style="text-align:left">
+								{#userProjects}
+								<li>
+									{?auth}
+										<a href="/projects/{.uri}">{.name}</a>
+									{:else}
+										{.name}
+									{/auth}
+									{?.users}
+									<br/>Members
+									<ul>
+										{#.users}
 										{?auth}
-											<a href="/projects/{.uri}">{.name}</a>
+										<li><a href="/users/{.id}">{.name}</a></li>
 										{:else}
-											{.name}
+										<li>{.name}</li>
 										{/auth}
-										{?.users}
-										<br/>Members
-										<ul>
-											{#.users}
-											{?auth}
-											<li><a href="/users/{.id}">{.name}</a></li>
-											{:else}
-											<li>{.name}</li>
-											{/auth}
-											{/.users}
-										</ol>
 										{/.users}
-									</li>
-									{@sep}
-									<li style="list-style-type:none"><br/></li>
-									{/sep}
-									{/userProjects}
-								</ul>
-								{:else}
-								No projects!
+									</ul>
+									{/.users}
+								</li>
+								{@sep}
+								<li style="list-style-type:none"><br/></li>
+								{/sep}
 								{/userProjects}
-							</div>
+							</ul>
+							{:else}
+							No projects!
+							{/userProjects}
 						</div>
+						{/user.perm}
 					</div>
 				</div>
 			</div>

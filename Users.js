@@ -72,6 +72,19 @@ Users.prototype.setPassword = function( req, res, next ) {
 	});
 };
 
+Users.prototype.setType = function( req, res, next ) {
+  var self = this;
+  var type = req.param( 'type' );
+  var userId = req.params.uri;
+  self._users.update( { id:userId }, { '$set':{ type:type } }, function( err ) {
+    if( err ) {
+      console.log( err.msg );
+      res.send(500);
+    }
+    res.redirect( '/users/'+userId );
+  });
+};
+
 Users.prototype.addUser = function( req, res, next ) {
   var self = this;
   var pass = req.param( 'password' );

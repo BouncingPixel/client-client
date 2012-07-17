@@ -24,7 +24,7 @@
 			  	<form class="form-inline" method="POST" action="checkPassword">
 			  		<input name="username" type="text" class="input-small" placeholder="username">
 			  		<input name="password" type="password" class="input-small" placeholder="password">
-			  		<button type="submit" class="btn">login</button>
+			  		<button type="submit" class="btn">Log In</button>
 				</form>
 	  		</div>
 			</div>

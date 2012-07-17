@@ -3,13 +3,11 @@
 		<ul class="nav nav-list">
 			<li class="nav-header"><h4>Contents</h4></li>
 			<li class="nav-header">
-				<span style="white-space:nowrap"> 
-					<i class="icon-globe"></i> 
-					Links
-				</span>
-			</li>
-			<li>
-				<a href="/dashboard">Dashboard</a>
+				<a href="/dashboard">
+					<span style="white-space:nowrap">
+					<i class="icon-list"></i> 
+					Dashboard
+				</a>
 			</li>
 		</ul>
 			{?perm}
@@ -52,17 +50,32 @@
 				{/projects}
 			{:else}
 				{?clientOf}
+		<ul class="nav nav-list">
 			<li class="nav-header">
-				<span style="white-space:nowrap">
-					<i class="icon-folder-open"></i> 
-					Your Projects
-				</span>
+				<a href="#" data-toggle="collapse" data-target="#projectlist">
+					<span style="white-space:nowrap">
+						<i class="icon-folder-open"></i> 
+						Your Projects
+					</span>
+				</a>
 			</li>
+		</ul>
+		<ul class="nav nav-list collapse" id="projectlist">
 					{#clientOf}
 			<li><a href="/projects/{.uri}">{.name}</a></li>
 					{/clientOf}
+		</ul>
 				{/clientOf}
 			{/perm}
+		<ul class="nav nav-list">
+			<li class="nav-header">
+				<a href="/logout">
+					<span style="white-space:nowrap">
+						<i class="icon-share-alt"></i> 
+						Log Out
+					</span>
+				</a>
+			</li>
 		</ul>
 	</div>
 </div>

@@ -22,7 +22,9 @@
   			<div class="span9">
   				<ul class="nav">
   					<li class="nav-header">
-  						<h3>Dashboard</h3>
+  						<h3>Dashboard 
+  							<small style="text-transform:none">Client Client</small>
+  						</h3>
   					</li>
   				</ul>
 		  		{?auth}
@@ -48,20 +50,22 @@
 			  	{/auth}
 			  	<div class="row-fluid tab-content">
 			  		<div class="tab-pane active" id="pass">
-							<div class="span5" style="text-align:center">
-								{>"views/changePassword.dust"/}
-				  		</div>
+			  			{^perm}
+			  			<hr/>
+			  			<ul class="nav">
+			  				<li class="nav-header">
+			  					<h4>Change Password</h4>
+			  				</li>
+			  			</ul>
+			  			{/perm}
+							{>"views/changePassword.dust"/}
 				  	</div>
 						{?auth}
 						<div class="tab-pane" id="user">
-							<div class="span5" style="text-align:center">
-								{>"views/addUser.dust"/}
-							</div>
+							{>"views/addUser.dust"/}
 						</div>
 						<div class="tab-pane" id="project">
-							<div class="span5" style="text-align:center">
-								{>"views/addProject.dust"/}
-							</div>
+							{>"views/addProject.dust"/}
 						</div>
 						{/auth}
 					</div>

@@ -5,10 +5,11 @@
 	<input name="password" type="password" class="input" placeholder="password">
 	<br />
 	<br />
+	<div style="margin-left:5px">
 	<input name="type" type="radio" class="input" value="admin" checked="checked"> Admin 
 	<input name="type" type="radio" class="input" value="employee"> Employee 
 	<input name="type" type="radio" class="input" value="client"> Client
-	<br />
+	</div>
 	<br />
 	<button type="submit" class="btn">Create User</button>
 </form>
