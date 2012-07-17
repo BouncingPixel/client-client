@@ -1,5 +1,6 @@
-<div class="nav">
-	<span class="nav-header"><h4>Bouncing Pixel</h4></span>
-	<h6>{name}</h6>
+<div class="page-header">
+	<h1>Bouncing Pixel 
+		<small>{name}</small>
+	</h1>
 </div>
 

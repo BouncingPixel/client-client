@@ -12,6 +12,7 @@
   var consolidate = require('consolidate');
   var async = require('async');
   var request = require('request');
+  var MongoStore = require('connect-mongodb');
   var Logger = require('bunyan');
   var sio = require("socket.io");
   var Rackspace = require('./Rackspace').Rackspace;
@@ -130,7 +131,12 @@
       cc.configure( function() {
         cc.set( 'view engine', 'dust' );
         cc.use( express.cookieParser( "rawr" ) );
-        cc.use( express.session( { cookie: { maxAge: 3600000 } } ) );
+        cc.use( express.session({
+          secret: "rawr",
+          store: new MongoStore({
+            db: mongo.getDB()
+          })
+        }));
         cc.use( express.static( __dirname + '/static' ) );
         cc.use( express.json() );
         cc.use( express.urlencoded() );

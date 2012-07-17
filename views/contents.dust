@@ -11,14 +11,20 @@
 			<li>
 				<a href="/dashboard">Dashboard</a>
 			</li>
+		</ul>
 			{?perm}
 				{?users}
+		<ul class="nav nav-list">
 			<li class="nav-header">
-				<span style="white-space:nowrap">
-					<i class="icon-user"></i> 
-					Users
-				</span>
+				<a href="#" data-toggle="collapse" data-target="#userlist">
+					<span style="white-space:nowrap">
+						<i class="icon-user"></i> 
+						Users
+					</span>
+				</a>
 			</li>
+		</ul>
+		<ul class="nav nav-list collapse" id="userlist">
 					{#users auth=auth}
 						{?auth}
 			<li><a href="/users/{id}">{name}</a></li>
@@ -27,13 +33,19 @@
 						{/auth}
 					{/users}
 				{/users}
+		</ul>
+		<ul class="nav nav-list">
 				{?projects}
 			<li class="nav-header">
-				<span style="white-space:nowrap">
-					<i class="icon-folder-open"></i> 
-					Projects
-				</span>
+				<a href="#" data-toggle="collapse" data-target="#projectlist">
+					<span style="white-space:nowrap">
+						<i class="icon-folder-open"></i> 
+						Projects
+					</span>
+				</a>
 			</li>
+		</ul>
+		<ul class="nav nav-list collapse" id="projectlist">
 					{#projects}
 			<li><a href="/projects/{.uri}">{.name}</a></li>
 					{/projects}
