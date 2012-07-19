@@ -62,3 +62,17 @@ div.div-striped div.last {
 div.btn-group span.dropdown a.dropdown-toggle:hover {
 	text-decoration: none;
 }
+.triangle-up {
+	-moz-transform: rotate(180deg);
+	-webkit-transform: rotate(180deg);
+	-o-transform: rotate(180deg);
+	-ms-transform: rotate(180deg);
+	transform: rotate(180deg);
+}
+.triangle-right {
+	-moz-transform: rotate(-90deg);
+	-webkit-transform: rotate(-90deg);
+	-o-transform: rotate(-90deg);
+	-ms-transform: rotate(-90deg);
+	transform: rotate(-90deg);
+}

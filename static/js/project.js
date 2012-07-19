@@ -7,13 +7,21 @@ $(function() {
 	//automatically show projectlist in contents partial for project page
 	$("#projectlist").addClass("in");
 	//toggle caret from horizontal to vertical and back
-	$(".div-tab").one("click", function () {
+	$(".div-tab").on("click", function () {
+		$(this).children(".triangle").toggleClass("triangle-right");
+	});
+	$("div#sortbar a.dropdown").one("click.triangle", function () {
 		var self = arguments.callee;
-		$(this).children(".triangle").html("&#x25be;");
-		$(this).one("click", function () {
-			$(this).children(".triangle").html("&#x25b8;");
-			$(this).one("click", self);
-		});
+		var alt = function () {
+			$(this).children(".triangle").removeClass("triangle-up");
+			$("div#sortbar a.dropdown:has(b.triangle)").off("click.triangle").one("click.triangle", alt);
+			$("div#sortbar a.dropdown:has(b.triangle-up)").off("click.triangle").one("click.triangle", self);
+			$(this).off("click.triangle").one("click.triangle", self).removeAttr("data-reverse");
+		};
+		$(this).children(".triangle").addClass("triangle-up");
+		$("div#sortbar a.dropdown:has(b.triangle)").off("click.triangle").one("click.triangle", alt);
+		$("div#sortbar a.dropdown:has(b.triangle-up)").off("click.triangle").one("click.triangle", self);
+		$(this).off("click.triangle").one("click.triangle", alt).attr("data-reverse", "reverse");
 	});
 	//enable tooltips
 	$(".div-striped .btn").tooltip();
@@ -58,12 +66,13 @@ $(function() {
 		}).last().addClass("last");
 	});
 	//enable sorting by various data-types
-	$("div.btn-group a[data-toggle='sort']").on("click", function (e) {
+	$("div#sortbar a[data-toggle='sort']").one("click", function (e) {
 		if(e.cancelable) e.preventDefault();
 		$("div.btn-group a[data-toggle='sort']").removeClass("active");
 		$(this).addClass("active");
 		var attr = "[data-sort='"+($(this).attr("data-sort"))+"']";
 		var type = $(this).attr("data-class");
+		var reverse = !!$(this).attr("data-reverse");
 		var arr = $("div.div-striped > div").detach().toArray();
 		var $arr = $(arr);
 		arr.sort(function (a, b) {
@@ -88,22 +97,22 @@ $(function() {
 				tabB = false;
 			}
 			if(fileClassA === fileClassB) {
-				if(tabA) return -1;
-				if(tabB) return 1;
+				if(tabA) return (reverse?1:-1);
+				if(tabB) return (reverse?-1:1);
 				var propA = $a.find("a[data-toggle='sort']").attr("data-sort");
 				var propB = $b.find("a[data-toggle='sort']").attr("data-sort");
 				switch (propA) {
 					case "Date Modified":
-						return -1;
+						return (reverse?1:-1);
 					case "Content-Type":
 						switch (propB) {
 							case "Date Modified":
-								return 1;
+								return (reverse?-1:1);
 							case "Size":
-								return -1;
+								return (reverse?1:-1);
 						}
 					case "Size":
-						return 1;
+						return (reverse?-1:1);
 				}
 			}
 			var sortA = $arr.filter("."+fileClassA).add($arr.filter("[data-target='."+fileClassA+"']")).find("a"+attr).attr("data-value");
@@ -118,22 +127,31 @@ $(function() {
 					if(sortB!==sortA) return sortB-sortA;
 					var fileIndexA = Number(fileClassA.substr(4));
 					var fileIndexB = Number(fileClassB.substr(4));
-					return fileIndexA-fileIndexB;
+					return (reverse?fileIndexB-fileIndexA:fileIndexA-fileIndexB);
 				case "String":
 					if(sortA.toLowerCase().localeCompare(sortB.toLowerCase())!==0) {
-						return sortA.toLowerCase().localeCompare(sortB.toLowerCase());
+						return sortA.toLowerCase().localeCompare(sortB.toLowerCase())*(reverse?-1:1);
 					}
 					var fileIndexA = Number(fileClassA.substr(4));
 					var fileIndexB = Number(fileClassB.substr(4));
-					return fileIndexA-fileIndexB;
+					return (reverse?fileIndexB-fileIndexA:fileIndexA-fileIndexB);
 			}
 		}).forEach(function (elem) {
 			$("div.div-striped").append(elem);
 		});
+		$("div.div-striped div.div-row").each(function (index, el) {
+			if(index%2==1) {
+				$(el).addClass("striped-row");
+			} else {
+				$(el).removeClass("striped-row");
+			}
+	//prevent last div from overlapping on the .div-striped border-radius
+		}).removeClass("last").last().addClass("last");
+		$(this).one("click", arguments.callee);
 		return false;
 	});
 	//sort initially by date
-	$("div.btn-group a[data-sort='Date Modified']").trigger("click");
+	$("div.btn-group a[data-sort='Date Modified']").trigger("click").trigger("click");
 });
 
 var disable = function(e) {
