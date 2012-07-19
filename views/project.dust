@@ -5,6 +5,7 @@
   	<meta name="viewport" content="width=device-width, initial-scale=1.0">
   	<link type="text/css" href="/css/bootstrap.css" rel="stylesheet">
   	<link type="text/css" href="/css/bootstrap-responsive.css" rel="stylesheet">
+  	<link type="text/css" href="/css/project.css" rel="stylesheet">
   	<!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
   	<!--[if lt IE 9]>
       <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
@@ -44,14 +45,12 @@
   		<div class="row-fluid">
   			{>"views/contents.dust"/}
   			<div class="span9">
-			  	<ul class="nav">
-			  		<li class="nav-header">
-			  			<h3>Project 
-			  				{#project auth=auth}
-			  				<small style="text-transform:none">{name}</small>
-			  			</h3>
-			  		</li>
-			  	</ul>
+			  	<div class="nav-header">
+		  			<h3>Project 
+		  				{#project auth=auth}
+		  				<small style="text-transform:none">{name}</small>
+		  			</h3>
+		  		</div>
 			  	<div class="row-fluid">
 			  		<ul class="nav nav-tabs">
 			  			{?herokuEnabled}

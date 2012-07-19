@@ -209,13 +209,12 @@ Projects.prototype.getFiles = function( project, callback ) {
     if ( err ) {
       callback( err );
     } else if ( Array.isArray(files) ) {
-      callback( null, files.map( function( file ) {
+      callback( null, files.map( function( file, index ) {
         return {
           props:Object.getOwnPropertyNames( file ).filter(function( prop ) {
             switch(prop) {
-              case "name":
+              case "lastModified":
               case "contentType":
-              case "container":
               case "bytes":
                 return true;
               default:
@@ -223,28 +222,47 @@ Projects.prototype.getFiles = function( project, callback ) {
             }
           }).map( function( prop ) {
             switch(prop) {
-              case "name":
-                return { prop:"Name", val:unescape(file[prop]) };
+              case "lastModified":
+                return { prop:"Date Modified", val:new Date(file[prop]), data:new Date(file[prop]), class:"Date" };
               case "contentType":
-                return { prop: "Content-Type", val:file[prop] };
-              case "container":
-                return { prop: "Container", val:file[prop] };
+                return { prop: "Content-Type", val:file[prop], data:file[prop], class:"String" };
               case "bytes":
                 var bytes = file[prop];
+                var obj;
                 if(bytes < 1024) {
-                  return { prop:"Bytes", val:bytes };
+                  obj = { val:bytes+" B" };
                 } else if(bytes < 1024*1024) {
-                  return { prop: "Kilobytes", val:(bytes/1024).toFixed(1) };
+                  obj = { val:(bytes/1024).toFixed(1)+" kB" };
                 } else if(bytes < 1024*1024*1024) {
-                  return { prop: "Megabytes", val:(bytes/(1024*1024)).toFixed(1) };
+                  obj = { val:(bytes/(1024*1024)).toFixed(1)+" MB" };
                 } else if(bytes < 1024*1024*1024*1024) {
-                  return { prop: "Gigabytes", val:(bytes/(1024*1024*1024)).toFixed(1) };
+                  obj = { val:(bytes/(1024*1024*1024)).toFixed(1)+" GB" };
                 } else {
-                  return { prop: "Terabytes", val:(bytes/(1024*1024*1024*1024)).toFixed(1) };
+                  obj = { val:(bytes/(1024*1024*1024*1024)).toFixed(1)+" TB" };
                 }
+                obj.prop = "Size";
+                obj.class = "Number";
+                obj.data = bytes;
+                return obj;
+            }
+          }).sort(function (a, b) {
+            switch (a.prop) {
+              case "Date Modified":
+                return -1;
+              case "Content-Type":
+                switch (b.prop) {
+                  case "Date Modified":
+                    return 1;
+                  case "Size":
+                    return -1;
+                }
+              case "Size":
+                return 1;
             }
           }),
-          name: file.name
+          name: unescape(file.name),
+          filename: file.name,
+          index: index
         };
       }) );
     } else {

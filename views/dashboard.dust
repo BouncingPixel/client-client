@@ -20,13 +20,11 @@
   		<div class="row-fluid">
   			{>"views/contents.dust"/}
   			<div class="span9">
-  				<ul class="nav">
-  					<li class="nav-header">
-  						<h3>Dashboard 
-  							<small style="text-transform:none">Client Client</small>
-  						</h3>
-  					</li>
-  				</ul>
+  				<div class="nav-header">
+						<h3>Dashboard 
+							<small style="text-transform:none">Client Client</small>
+						</h3>
+					</div>
 		  		{?auth}
 		  		<div class="row-fluid">
 			  		<ul class="nav nav-tabs" id="tabs" style="text-align:center">

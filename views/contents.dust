@@ -30,10 +30,10 @@
 			<li>{name}</li>
 						{/auth}
 					{/users}
-				{/users}
 		</ul>
-		<ul class="nav nav-list">
+				{/users}
 				{?projects}
+		<ul class="nav nav-list">
 			<li class="nav-header">
 				<a href="#" data-toggle="collapse" data-target="#projectlist">
 					<span style="white-space:nowrap">
@@ -47,6 +47,7 @@
 					{#projects}
 			<li><a href="/projects/{.uri}">{.name}</a></li>
 					{/projects}
+		</ul>
 				{/projects}
 			{:else}
 				{?clientOf}

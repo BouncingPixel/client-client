@@ -24,13 +24,11 @@
   		<div class="row-fluid">
   			{>"views/contents.dust"/}
   			<div class="span9">
-	  			<ul class="nav">
-	  				<li class="nav-header">
-	  					<h3>Heroku App 
-	  						<small style="text-transform:none">{dict.name}</small>
-	  					</h3>
-	  				</li>
-	  			</ul>
+	  			<div class="nav-header">
+						<h3>Heroku App 
+							<small style="text-transform:none">{dict.name}</small>
+						</h3>
+					</div>
 	  			<ul class="nav nav-tabs">
 	  				<li class="active">
 	  					<a href="#" data-toggle="tab" data-target="#herokuinfo">
