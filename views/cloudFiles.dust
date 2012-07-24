@@ -26,7 +26,6 @@
   <div class="div-striped" style="padding:0px 5px">
     {#files uri=project.uri}
       <div class="row-fluid div-row div-tab" data-toggle="collapse" data-target=".file{.index}">
-        <b class="triangle triangle-right muted" style="display:inline-block;width:9px">&#x25be;</b> 
         <div class="btn-group" style="display:inline-block;vertical-align:middle">
           <button class="btn btn-small" onclick="settings('/projects/{uri}/update/{.filename}', '{.name}')" rel="tooltip" title="Settings">
             <i class="icon-wrench"></i>
@@ -35,7 +34,8 @@
             <i class="icon-download"></i>
           </a>
         </div> 
-        <h5 style="display:inline;text-transform:none">{.name}</h5>
+        <h5 style="display:inline;text-transform:none">{.name}</h5> 
+        <b class="triangle triangle-right muted" style="display:inline-block;width:9px">&#x25be;</b>
         <a href="#" data-toggle="sort" data-sort="Name" data-value="{.name}" data-class="String"></a>
         <div class="btn-group" style="float:right;margin-top:1px;display:inline-block;vertical-align:middle">
           <a href="/projects/{uri}/remove/{.filename}" class="btn btn-small" rel="tooltip" title="Delete">
@@ -45,14 +45,19 @@
       </div>
       {#.props index=.index}
         <div class="row-fluid collapse file{index}">
-          <div class="def-title">
-            <a href="#" data-toggle="sort" data-sort="{.prop}" data-value="{.data}" data-class="{.class}">
-              {.prop}
-            </a>:
+          <div class="def-title hidden-phone muted">
+            {.prop}:
           </div>
-          <div class="def-desc">
+          <div class="def-desc hidden-phone">
             {.val}
           </div>
+          <div class="def-title visible-phone muted">
+            {.prop}:
+          </div>
+          <div class="def-desc visible-phone">
+            {.val}
+          </div>
+          <a href="#" data-toggle="sort" data-sort="{.prop}" data-value="{.data}" data-class="{.class}"></a>
         </div>
       {/.props}
     {/files}

@@ -11,20 +11,22 @@ $(function() {
 		$(this).children(".triangle").toggleClass("triangle-right");
 	});
 	$("div#sortbar a.dropdown").one("click.triangle", function () {
+		console.log("enabling reverse");
 		var self = arguments.callee;
 		var alt = function () {
-			$(this).children(".triangle").removeClass("triangle-up");
+			console.log("disabling reverse");
+			$(this).removeAttr("data-reverse").children(".triangle").removeClass("triangle-up");
 			$("div#sortbar a.dropdown:has(b.triangle)").off("click.triangle").one("click.triangle", alt);
 			$("div#sortbar a.dropdown:has(b.triangle-up)").off("click.triangle").one("click.triangle", self);
-			$(this).off("click.triangle").one("click.triangle", self).removeAttr("data-reverse");
+			$(this).off("click.triangle").one("click.triangle", self);
 		};
-		$(this).children(".triangle").addClass("triangle-up");
+		$(this).attr("data-reverse", "reverse").children(".triangle").addClass("triangle-up");
 		$("div#sortbar a.dropdown:has(b.triangle)").off("click.triangle").one("click.triangle", alt);
 		$("div#sortbar a.dropdown:has(b.triangle-up)").off("click.triangle").one("click.triangle", self);
-		$(this).off("click.triangle").one("click.triangle", alt).attr("data-reverse", "reverse");
+		$(this).off("click.triangle").one("click.triangle", alt);
 	});
 	//enable tooltips
-	$(".div-striped .btn").tooltip();
+	$("[rel='tooltip']").tooltip();
 	//prevent inset buttons from toggling the collapse plugin
 	$(".div-tab div.btn-group").on("click", function (e) {
 		if(e.cancelable) e.preventDefault();
@@ -66,13 +68,14 @@ $(function() {
 		}).last().addClass("last");
 	});
 	//enable sorting by various data-types
-	$("div#sortbar a[data-toggle='sort']").one("click", function (e) {
+	$("div#sortbar a[data-toggle='sort']").one("click.sort", function (e) {
 		if(e.cancelable) e.preventDefault();
 		$("div.btn-group a[data-toggle='sort']").removeClass("active");
 		$(this).addClass("active");
 		var attr = "[data-sort='"+($(this).attr("data-sort"))+"']";
 		var type = $(this).attr("data-class");
 		var reverse = !!$(this).attr("data-reverse");
+		console.log(reverse);
 		var arr = $("div.div-striped > div").detach().toArray();
 		var $arr = $(arr);
 		arr.sort(function (a, b) {
@@ -97,22 +100,22 @@ $(function() {
 				tabB = false;
 			}
 			if(fileClassA === fileClassB) {
-				if(tabA) return (reverse?1:-1);
-				if(tabB) return (reverse?-1:1);
+				if(tabA) return -1;
+				if(tabB) return 1;
 				var propA = $a.find("a[data-toggle='sort']").attr("data-sort");
 				var propB = $b.find("a[data-toggle='sort']").attr("data-sort");
 				switch (propA) {
 					case "Date Modified":
-						return (reverse?1:-1);
+						return -1;
 					case "Content-Type":
 						switch (propB) {
 							case "Date Modified":
-								return (reverse?-1:1);
+								return 1;
 							case "Size":
-								return (reverse?1:-1);
+								return -1;
 						}
 					case "Size":
-						return (reverse?-1:1);
+						return 1;
 				}
 			}
 			var sortA = $arr.filter("."+fileClassA).add($arr.filter("[data-target='."+fileClassA+"']")).find("a"+attr).attr("data-value");
@@ -124,7 +127,7 @@ $(function() {
 				case "Number":
 					sortA = Number(sortA);
 					sortB = Number(sortB);
-					if(sortB!==sortA) return sortB-sortA;
+					if(sortB!==sortA) return (reverse?sortA-sortB:sortB-sortA);
 					var fileIndexA = Number(fileClassA.substr(4));
 					var fileIndexB = Number(fileClassB.substr(4));
 					return (reverse?fileIndexB-fileIndexA:fileIndexA-fileIndexB);
@@ -147,7 +150,7 @@ $(function() {
 			}
 	//prevent last div from overlapping on the .div-striped border-radius
 		}).removeClass("last").last().addClass("last");
-		$(this).one("click", arguments.callee);
+		$("div#sortbar a[data-toggle='sort']").off("click.sort").one("click.sort", arguments.callee);
 		return false;
 	});
 	//sort initially by date

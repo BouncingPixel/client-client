@@ -171,7 +171,7 @@
 			  		  	</div>
 			  		  </div>
 		  			  <input type="file" class="input" name="file" multiple="true">
-		  			  <button class="btn btn-mini" onclick="upload(event);" id="upload-btn"><i class="icon-upload"></i></button>
+		  			  <button class="btn btn-mini" onclick="upload(event);" id="upload-btn" rel="tooltip" title="Upload"><i class="icon-upload"></i></button>
 		  		    </form>
 		  		    <br/>
 		  		    {>"views/cloudFiles.dust"/}

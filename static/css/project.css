@@ -53,11 +53,20 @@ div.div-striped div.last {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.def-title.hidden-phone {
+	margin-left: 71px;
+}
 .def-desc {
-  margin-left: 96px;
+	margin-left: 96px;
   overflow: hidden;
   text-overflow: hidden;
   white-space: nowrap;
+}
+.def-desc.hidden-phone {
+	margin-left: 167px;
+}
+.def-desc.visible-phone {
+	margin-left: 96px;
 }
 div.btn-group span.dropdown a.dropdown-toggle:hover {
 	text-decoration: none;
