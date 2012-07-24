@@ -15,6 +15,7 @@
   var MongoStore = require('connect-mongodb');
   var Logger = require('bunyan');
   var sio = require("socket.io");
+  var jitsu = require("nodejitsu-api");
   var Rackspace = require('./Rackspace').Rackspace;
   var HerokuClient = require('./HerokuClient').HerokuClient;
   var Users = require('./Users').Users;
@@ -29,6 +30,7 @@
   var herokuClient;
   var users;
   var projects;
+  var njClient;
 
   var log = new Logger( {
     name:'client-client',
@@ -79,6 +81,13 @@
     log.info( "HEROKUCLIENT: STARTING" );
     herokuClient = new HerokuClient( configuration.herokuInfo );
     log.info( "HEROKUCLIENT: SUCCESS" );
+    callback();
+  };
+
+  var startNJClient = function( callback ) {
+    log.info( "NODEJITSUCLIENT: STARTING" );
+    njClient = jitsu.createClient( configuration.nodejitsuInfo );
+    log.info( "NODEJITSUCLIENT: SUCCESS" );
     callback();
   };
 
@@ -318,6 +327,36 @@
             locals.herokuAppConfigVars = JSON.parse(body);
             callback();
           });
+        },
+        getAllNodejitsuApps: function (callback) {
+          njClient.apps.list(function (err, json) {
+            if(err) {
+              console.log(err);
+              return callback(err);
+            }
+            locals.allNodejitsuApps = json;
+            callback();
+          });
+        },
+        getNodejitsuApp: function (nodejitsuApp, callback) {
+          njClient.apps.view(nodejitsuApp, function (err, json) {
+            if(err) {
+              console.log(err);
+              return callback(err);
+            }
+            locals.nodejitsuApp = json;
+            callback();
+          });
+        },
+        getNodejitsuAppLogs: function (nodejitsuApp, callback) {
+          njClient.logs.byApp(nodejitsuApp, 100, function (err, json) {
+            if(err) {
+              console.log(err);
+              return callback(err);
+            }
+            locals.nodejitsuAppLogs = json;
+            callback();
+          });
         }
       };
       var walk = function (array) {
@@ -424,10 +463,6 @@
         return callback(err);
       }
     };
-
-    cc.get( '/favicon.ico', function( req, res, next ) {
-      return res.send(404, '');
-    });
 
     cc.get( '/authenticate', function( req, res, next ) {
       var locals = { title:configuration.loginTitle,
@@ -538,10 +573,16 @@
               "locals.project.herokuApps",
               "getHerokuAppProcesses"
             ],
-            "getProjectFiles:locals.project"
+            "getProjectFiles:locals.project",
+            [
+              "map",
+              "locals.project.nodejitsuApps",
+              "getNodejitsuApp"
+            ]
           ]
         ],
-        "getAllHerokuApps"
+        "getAllHerokuApps",
+        "getAllNodejitsuApps"
       ];
       var options = {
         "projectUri":req.params.uri,
@@ -563,6 +604,33 @@
         var hash = bcrypt.hashSync(locals.project.container||"", salt);
         var clients = locals.allClients.filter( function( val ) {
           return locals.project.users.indexOf(val.name)<0;
+        });
+        var nodejitsuApps = locals.allNodejitsuApps.filter(function (app) {
+          return locals.project.nodejitsuApps.indexOf(app.name)<0;
+        });
+        locals.project.nodejitsuApps = locals.nodejitsuApp.map(function (app) {
+          return {
+            array: Object.getOwnPropertyNames(app).filter(function (prop) {
+              var val = app[prop];
+              switch (typeof val) {
+                case "undefined":
+                  return false;
+                case "object":
+                case "string":
+                  return !!val;
+                default:
+                  return true;
+              }
+            }).map(function (prop) {
+              return {
+                name:prop,
+                value:app[prop]
+              };
+            }),
+            status: app.running?"Running v"+app.running.id:"Stopped",
+            name: app.name,
+            uri: escape(app.name)
+          };
         });
         locals.project.herokuApps = locals.project.herokuApps.map(function (appName, index) {
           var app = {
@@ -606,18 +674,21 @@
             container: locals.project.container,
             hash: hash,
             herokuApps: locals.project.herokuApps,
-            herokuEnabled: locals.project.herokuEnabled
+            herokuEnabled: locals.project.herokuEnabled,
+            nodejitsuApps: locals.project.nodejitsuApps,
+            nodejitsuEnabled: locals.project.nodejitsuEnabled
           },
-          name:req.session.name,
-          auth:auth,
-          perm:perm,
-          isClient:isClient,
+          name: req.session.name,
+          auth: auth,
+          perm: perm,
+          isClient: isClient,
           users: locals.allUsers,
           projects: locals.allProjects,
           clientOf: locals.userProjects,
-          clients:clients,
-          files:locals.projectFiles,
-          herokuApps:herokuApps
+          clients: clients,
+          files: locals.projectFiles,
+          herokuApps: herokuApps,
+          nodejitsuApps: nodejitsuApps
         };
         res.render( 'project', locals );
       };
@@ -634,6 +705,10 @@
 
     cc.post( '/projects/:uri/enableSharing', function( req, res, next ) {
       projects.enableSharing( req, res, next );
+    });
+
+    cc.post( '/projects/:uri/enableNodejitsu', function( req, res, next ) {
+      projects.enableNodejitsu( req, res, next );
     });
 
     cc.post( '/projects/:uri/enableHeroku', function( req, res, next ) {
@@ -658,6 +733,10 @@
 
     cc.post( '/projects/:uri/addHerokuApp', function( req, res, next ) {
       projects.addHerokuApp( req, res, next );
+    });
+
+    cc.post( '/projects/:uri/addNodejitsuApp', function( req, res, next ) {
+      projects.addNodejitsuApp( req, res, next );
     });
     
     cc.get( '/herokuApps/:name', function( req, res, next ) {
@@ -789,6 +868,63 @@
       }
     });
 
+    cc.get( '/nodejitsuApps/:name', function ( req, res, next ) {
+      var asyncMethods = [
+        "parallel",
+        "getAllUsers",
+        "getAllProjects",
+        "getUserProjects:options.projectUser",
+        "getNodejitsuApp:options.nodejitsuAppName",
+        "getNodejitsuAppLogs:options.nodejitsuAppName"
+      ];
+      var options = {
+        projectUser: req.session.name,
+        nodejitsuAppName: unescape(req.params.name)
+      };
+      var callback = function (err, locals) {
+        if(err) {
+          console.log(err);
+          return res.send(500);
+        }
+        var auth = req.session.type==="admin";
+        var perm = auth||req.session.type==="employee";
+        locals = {
+          nodejitsuApp: {
+            array: Object.getOwnPropertyNames(locals.nodejitsuApp).map(function (prop) {
+              return {
+                name: prop,
+                value: locals.nodejitsuApp[prop]
+              };
+            }).filter(function (obj) {
+              switch (typeof obj.value) {
+                case "undefined":
+                case "object":
+                  return false;
+                case "string":
+                  return !!obj.value;
+                default:
+                  return true;
+              }
+            }),
+            logs: locals.nodejitsuAppLogs.data.map(function (line) {
+              return line.timestamp+" "+line.json.message;
+            }).join(""),
+            snapshots: locals.nodejitsuApp.snapshots,
+            drones: locals.nodejitsuApp.drones,
+            name: locals.nodejitsuApp.name
+          },
+          name: req.session.name,
+          auth: auth,
+          perm: perm,
+          users: locals.allUsers,
+          projects: locals.allProjects,
+          clientOf: locals.userProjects
+        };
+        res.render( 'nodejitsuAppStats', locals);
+      }
+      getLocals(asyncMethods, options, callback);
+    });
+
     cc.post( '/users/:uri/update', function( req, res, next ) {
       users.setType(req, res, next);
     });
@@ -868,6 +1004,7 @@
                   startDatabase,
                   startRackspace,
                   startHerokuClient,
+                  startNJClient,
                   startUsers,
                   startExpressConfiguration,
                   startSocketIO,

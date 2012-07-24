@@ -14,7 +14,8 @@
     "socket.io": "0.9.x",
     "formidable": "*",
     "qs": "*",
-    "request": "*"
+    "request": "*",
+    "nodejitsu-api": "*"
   },
   "scripts": {
     "start": "server.js"

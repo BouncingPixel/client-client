@@ -37,7 +37,7 @@ Projects.prototype.addProject = function( req, res, next ) {
   var name = req.param( 'name' );
   var parsedName = sanitize( name );
   if(parsedName) {
-    self._projects.insert( { name:name, uri:parsedName, users:[], herokuApps:[] }, { safe:true }, function( err ) {
+    self._projects.insert( { name:name, uri:parsedName, users:[], herokuApps:[], nodejitsuApps:[] }, { safe:true }, function( err ) {
       if( err ) { console.log( err.msg ); }
       res.redirect( '/projects/'+parsedName );
     });
@@ -48,7 +48,7 @@ Projects.prototype.addProject = function( req, res, next ) {
 
 Projects.prototype.find = function( uri, callback ) {
   var self = this;
-  self._projects.find( { uri:uri }, { name:1, users:1, uri:1, sharingEnabled:1, container:1, herokuApps:1, herokuEnabled:1 } ).toArray( callback );
+  self._projects.find( { uri:uri }, { name:1, users:1, uri:1, sharingEnabled:1, container:1, herokuApps:1, nodejitsuApps:1, herokuEnabled:1, nodejitsuEnabled:1 } ).toArray( callback );
 };
 
 Projects.prototype.getAllProjects = function( callback ) {
@@ -101,6 +101,18 @@ Projects.prototype.addHerokuApp = function( req, res, next ) {
   });
 };
 
+Projects.prototype.addNodejitsuApp = function( req, res, next ) {
+  var self = this;
+  self.find( req.params.uri, function( err, projects ) {
+    if (projects && projects[0] ) {
+      self._projects.update( { name:projects[0].name }, { '$push': { nodejitsuApps:req.param( 'appName' ) } }, function( err) {
+        if( err ) { console.log( err.msg ); }
+        res.redirect( '/projects/'+req.params.uri );
+      });
+    }
+  });
+};
+
 Projects.prototype.enableSharing = function( req, res, next ) {
   var self = this;
   self.find( req.params.uri, function( err, projects ) {
@@ -125,6 +137,20 @@ Projects.prototype.enableHeroku = function( req, res, next ) {
   self.find( req.params.uri, function( err, projects ) {
     if (projects && projects[0] ) {
       self._projects.update( { name:projects[0].name }, { '$set': { herokuEnabled:true } }, function( err ) {
+        if (err) {
+          console.log( err );
+        }
+        res.redirect( '/projects/'+req.params.uri );
+      });
+    }
+  });
+};
+
+Projects.prototype.enableNodejitsu = function( req, res, next ) {
+  var self = this;
+  self.find( req.params.uri, function( err, projects ) {
+    if (projects && projects[0] ) {
+      self._projects.update( { name:projects[0].name }, { '$set': { nodejitsuEnabled:true } }, function( err ) {
         if (err) {
           console.log( err );
         }
