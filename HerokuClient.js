@@ -5,7 +5,7 @@ var toBase64 = function (username, apiKey) {
 };
 
 var sanitize = function (str) {
-  if(str && typeof str === "string") return str.replace( /[^a-zA-Z\d_\-]/g, '' );
+  if(str && typeof str === "string") return str.replace( /[^a-zA-Z\d_\-]/g, '' ).toLowerCase();
   return "";
 }
 

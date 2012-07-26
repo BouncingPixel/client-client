@@ -43,7 +43,7 @@
 				</a>
 			</li>
 		</ul>
-		<ul class="nav nav-list collapse" id="projectlist">
+		<ul class="nav nav-list collapse in" id="projectlist">
 					{#projects}
 			<li><a href="/projects/{.uri}">{.name}</a></li>
 					{/projects}
@@ -61,7 +61,7 @@
 				</a>
 			</li>
 		</ul>
-		<ul class="nav nav-list collapse" id="projectlist">
+		<ul class="nav nav-list collapse in" id="projectlist">
 					{#clientOf}
 			<li><a href="/projects/{.uri}">{.name}</a></li>
 					{/clientOf}

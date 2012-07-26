@@ -1,15 +1,151 @@
 var IncomingForm = require('formidable').IncomingForm;
 var qs = require('qs');
+var BufferedStream = require('./BufferedStream').BufferedStream;
 
 // sockets will be stored according to hash values on project pages
 
 var io;
 var sockets = {};
 
+function randomStr(size) {
+  var names = ["bar", "bat", "bay"];
+  var length = names.length;
+  return names[Math.floor(Math.random()*length)];
+}
+
 function sanitize( str ) {
-  if(str && typeof str === "string") return str.replace( /[^a-zA-Z\d_\-]/g, '' );
+  if(str && typeof str === "string") return str.replace( /[^a-zA-Z\d_\-]/g, '' ).toLowerCase();
   return "";
 }
+
+// returns a directory-like object from an array of files containing paths
+Array.prototype.channelize = function () {
+  var self = this;
+  var root = {
+    isDirectory: true,
+    path: "",
+    name: "",
+    files: []
+  };
+  //formats the files
+  var formatFile = function (file, name) {
+    bytes = file.bytes;
+    date = new Date(file.lastModified);
+    return {
+      name: unescape(name),
+      filename: name,
+      path: file.name,
+      bytes: bytes,
+      date: date,
+      prettyDate: (date.toDateString().split(" ").slice(1).join(" "))+" "+date.toLocaleTimeString(),
+      type: file.contentType,
+      size: (function () {
+        var bytes = file.bytes;
+        if(bytes < 1024) {
+          return bytes+" B";
+        } else if(bytes < 1024*1024) {
+          return (bytes/1024).toFixed(1)+" kB";
+        } else if(bytes < 1024*1024*1024) {
+          return (bytes/(1024*1024)).toFixed(1)+" MB";
+        } else if(bytes < 1024*1024*1024*1024) {
+          return (bytes/(1024*1024*1024)).toFixed(1)+" GB";
+        } else {
+          return (bytes/(1024*1024*1024*1024)).toFixed(1)+" TB";
+        }
+      })()
+    };
+  };
+  //creates the directory
+  self.forEach(function (file) {
+    var path = unescape("root/"+randomStr()+"/"+file.name).split("/");
+    var cwd = root;
+    while(path.length) {
+      var dir = path.shift();
+      var index = -1;
+      for(var i=0;i<cwd.files.length;i++) {
+        if(cwd.files[i].isDirectory && cwd.files[i].name === dir) {
+          index = i;
+          break;
+        }
+      }
+      if (index === -1) {
+        index = cwd.files.length;
+        if(path.length) {
+          cwd.files.push({
+            isDirectory: true,
+            path: cwd.path+"/"+dir,
+            name: dir,
+            files: []
+          });
+          cwd = cwd.files[index];
+        } else {
+          cwd.files.push(formatFile(file, dir)); 
+        }
+      } else {
+        if(path.length) {
+          cwd = cwd.files[index];
+        } else {
+          cwd.files.push(formatFile(file, dir));
+        }
+      }
+    }
+  });
+  //calculates and sorts the directories
+  (function (dir) {
+    var self = arguments.callee;
+    var bytes = 0;
+    var date;
+    var files = dir.files;
+    var i = files.length;
+    while(i--) {
+      if(files[i].isDirectory) {
+        var stats = self(files[i]);
+        bytes += stats.bytes;
+        if(typeof date === "undefined") {
+          date = stats.date;
+        } else if(date < stats.date) {
+          date = stats.date;
+        }
+      } else {
+        bytes += files[i].bytes;
+        if(typeof date === "undefined") {
+          date = files[i].date;
+        } else if(date < files[i].date) {
+          date = files[i].date;
+        }
+      }
+    }
+    files.sort(function (a, b) {
+      var comp = a.name.localeCompare(b.name);
+      if(comp === 0) {
+        if(a.isDirectory) return -1;
+        return 1;
+      }
+      return comp;
+    });
+    dir.bytes = bytes;
+    dir.date = date;
+    dir.prettyDate = (date.toDateString().split(" ").slice(1).join(" "))+" "+date.toLocaleTimeString();
+    dir.size = (function () {
+      if(bytes < 1024) {
+        return bytes+" B";
+      } else if(bytes < 1024*1024) {
+        return (bytes/1024).toFixed(1)+" kB";
+      } else if(bytes < 1024*1024*1024) {
+        return (bytes/(1024*1024)).toFixed(1)+" MB";
+      } else if(bytes < 1024*1024*1024*1024) {
+        return (bytes/(1024*1024*1024)).toFixed(1)+" GB";
+      } else {
+        return (bytes/(1024*1024*1024*1024)).toFixed(1)+" TB";
+      }
+    })();
+    return {
+      bytes: bytes,
+      date: date
+    };
+  })(root);
+  return root;
+};
 
 var Projects = exports.Projects = function( spec ) {
   this._mongo = spec.mongo || null;
@@ -179,7 +315,9 @@ Projects.prototype.uploadFile = function( req, res, next ) {
       var file = escape(part.filename);
       pending++;
       part.headers["content-disposition"] = 'form-data; name="'+file+'"; filename="'+file+'"';
-      self._rackspace.saveStream( container, escape(file), part, function( err, success ) {
+      var buffer = new BufferedStream();
+      part.pipe(buffer);
+      self._rackspace.saveStream( container, escape(file), buffer, function( err, success ) {
         if (err) {
           console.log( err );
         }
@@ -235,62 +373,7 @@ Projects.prototype.getFiles = function( project, callback ) {
     if ( err ) {
       callback( err );
     } else if ( Array.isArray(files) ) {
-      callback( null, files.map( function( file, index ) {
-        return {
-          props:Object.getOwnPropertyNames( file ).filter(function( prop ) {
-            switch(prop) {
-              case "lastModified":
-              case "contentType":
-              case "bytes":
-                return true;
-              default:
-                return false;
-            }
-          }).map( function( prop ) {
-            switch(prop) {
-              case "lastModified":
-                return { prop:"Date Modified", val:new Date(file[prop]), data:new Date(file[prop]), class:"Date" };
-              case "contentType":
-                return { prop: "Content-Type", val:file[prop], data:file[prop], class:"String" };
-              case "bytes":
-                var bytes = file[prop];
-                var obj;
-                if(bytes < 1024) {
-                  obj = { val:bytes+" B" };
-                } else if(bytes < 1024*1024) {
-                  obj = { val:(bytes/1024).toFixed(1)+" kB" };
-                } else if(bytes < 1024*1024*1024) {
-                  obj = { val:(bytes/(1024*1024)).toFixed(1)+" MB" };
-                } else if(bytes < 1024*1024*1024*1024) {
-                  obj = { val:(bytes/(1024*1024*1024)).toFixed(1)+" GB" };
-                } else {
-                  obj = { val:(bytes/(1024*1024*1024*1024)).toFixed(1)+" TB" };
-                }
-                obj.prop = "Size";
-                obj.class = "Number";
-                obj.data = bytes;
-                return obj;
-            }
-          }).sort(function (a, b) {
-            switch (a.prop) {
-              case "Date Modified":
-                return -1;
-              case "Content-Type":
-                switch (b.prop) {
-                  case "Date Modified":
-                    return 1;
-                  case "Size":
-                    return -1;
-                }
-              case "Size":
-                return 1;
-            }
-          }),
-          name: unescape(file.name),
-          filename: file.name,
-          index: index
-        };
-      }) );
+      callback( null, files.channelize() );
     } else {
       callback( new Error( "files is not an array." ) );
     }

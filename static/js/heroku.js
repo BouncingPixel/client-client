@@ -3,6 +3,8 @@ var loadLog = function () {
 	xmlhttp.open("GET", location.pathname+"/logs?log="+escape(log), true);
 	xmlhttp.addEventListener("load", function (e) {
 		$("#log").html(xmlhttp.responseText);
+		$("#logtext").removeClass("muted");
+		$("#logstatus").removeClass("icon-refresh").addClass("icon-ok");
 	}, false);
 	xmlhttp.send();
 	$("#log").attr("wrap", "off");

@@ -16,6 +16,7 @@
   var Logger = require('bunyan');
   var sio = require("socket.io");
   var jitsu = require("nodejitsu-api");
+  var Stream = require("stream").Stream;
   var Rackspace = require('./Rackspace').Rackspace;
   var HerokuClient = require('./HerokuClient').HerokuClient;
   var Users = require('./Users').Users;
@@ -40,7 +41,7 @@
   });
 
   var sanitize = function ( str ) {
-    if(str && typeof str === "string") return str.replace( /[^a-zA-Z\d_\-]/g, '' );
+    if(str && typeof str === "string") return str.replace( /[^a-zA-Z\d_\-]/g, '' ).toLowerCase();
     return "";
   };
 
@@ -890,10 +891,31 @@
         var perm = auth||req.session.type==="employee";
         locals = {
           nodejitsuApp: {
+            name: locals.nodejitsuApp.name,
             array: Object.getOwnPropertyNames(locals.nodejitsuApp).map(function (prop) {
               return {
                 name: prop,
-                value: locals.nodejitsuApp[prop]
+                value: (function () {
+                  var value = locals.nodejitsuApp[prop];
+                  switch (typeof value) {
+                    case "number":
+                      switch (prop) {
+                        case "mtime":
+                        case "ctime":
+                          return new Date(value)+"";
+                        default:
+                          return value;
+                      }
+                    case "object":
+                      switch (prop) {
+                        case "running":
+                        case "active":
+                          return value.id;
+                      }
+                    default:
+                      return value;
+                  }
+                })()
               };
             }).filter(function (obj) {
               switch (typeof obj.value) {
@@ -901,17 +923,84 @@
                 case "object":
                   return false;
                 case "string":
-                  return !!obj.value;
+                  return obj.name!=="name"&&!!obj.value;
                 default:
                   return true;
               }
             }),
             logs: locals.nodejitsuAppLogs.data.map(function (line) {
-              return line.timestamp+" "+line.json.message;
+              return new Date(line.timestamp)+" "+line.json.message;
             }).join(""),
-            snapshots: locals.nodejitsuApp.snapshots,
-            drones: locals.nodejitsuApp.drones,
-            name: locals.nodejitsuApp.name
+            snapshots: locals.nodejitsuApp.snapshots.reverse().map(function (snapshot) {
+              return {
+                properties: Object.getOwnPropertyNames(snapshot).map(function (prop) {
+                  return {
+                    name: prop,
+                    value: (function () {
+                      var value = snapshot[prop];
+                      switch (typeof value) {
+                        case "number":
+                          switch (prop) {
+                            case "mtime":
+                            case "ctime":
+                              return new Date(value)+"";
+                            default:
+                              return value;
+                          }
+                        default:
+                          return value;
+                      }
+                    })()
+                  };
+                }).filter(function (obj) {
+                  switch (typeof obj.value) {
+                    case "undefined":
+                    case "object":
+                      return false;
+                    case "string":
+                      return obj.name!=="id"&&!!obj.value;
+                    default:
+                      return true;
+                  }
+                }),
+                name: snapshot.id
+              };
+            }),
+            drones: locals.nodejitsuApp.drones.map(function (drone) {
+              return {
+                properties: Object.getOwnPropertyNames(drone).map(function (prop) {
+                  return {
+                    name: prop,
+                    value: (function () {
+                      var value = drone[prop];
+                      switch (typeof value) {
+                        case "number":
+                          switch (prop) {
+                            case "mtime":
+                            case "ctime":
+                              return new Date(value)+"";
+                            default:
+                              return value;
+                          }
+                        default:
+                          return value;
+                      }
+                    })()
+                  };
+                }).filter(function (obj) {
+                  switch (typeof obj.value) {
+                    case "undefined":
+                    case "object":
+                      return false;
+                    case "string":
+                      return obj.name!=="uid"&&!!obj.value;
+                    default:
+                      return true;
+                  }
+                }),
+                name: drone.uid
+              };
+            })
           },
           name: req.session.name,
           auth: auth,
@@ -920,9 +1009,41 @@
           projects: locals.allProjects,
           clientOf: locals.userProjects
         };
-        res.render( 'nodejitsuAppStats', locals);
+        res.render( 'nodejitsuStatus', locals);
       }
       getLocals(asyncMethods, options, callback);
+    });
+
+    cc.post( '/nodejitsuApps/:name/restart', function( req, res, next ) {
+      njClient.apps.stop(req.params.name, function (err) {
+        if (err) {
+          console.log(err);
+          return res.send(500);
+        }
+        njClient.apps.start(req.params.name, function (err) {
+          if (err) {
+            console.log(err);
+            return res.send(500);
+          }
+          res.redirect( '/nodejitsuApps/'+req.params.name );
+        });
+      });
+    });
+
+    cc.get( '/nodejitsuApps/:name/:snapshot', function( req, res, next ) {
+      var response = njClient.snapshots.fetch(req.params.name, req.params.snapshot);
+      res.setHeader("Content-Disposition", 'name="'+req.params.snapshot+'.tgz"; filename="'+req.params.snapshot+'.tgz"');
+      response.pipe(res);
+    });
+
+    cc.post ( '/nodejitsuApps/:name/:snapshot/activate', function( req, res, next ) {
+      njClient.snapshots.activate(req.params.name, req.params.snapshot, function (err) {
+        if (err) {
+          console.log(err);
+          return res.send(500);
+        }
+        res.redirect( '/nodejitsuApps/'+req.params.name );
+      });
     });
 
     cc.post( '/users/:uri/update', function( req, res, next ) {

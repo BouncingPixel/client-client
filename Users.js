@@ -1,5 +1,5 @@
 function sanitize( str ) {
-  if(str && typeof str === "string") return str.replace( /[^a-zA-Z\d_\-]/g, '' );
+  if(str && typeof str === "string") return str.replace( /[^a-zA-Z\d_\-]/g, '' ).toLowerCase();
   return "";
 }
 
@@ -24,10 +24,10 @@ Users.prototype.authenticate = function( req, res, next ) {
 Users.prototype.checkPassword = function( req, res, next ) {
   var self = this;
   var pass = req.param('password');
-  var name = req.param('username');
+  var name = req.param('username').toLowerCase();
   var bcrypt = require('bcrypt');
   
-  self._users.find( { name:name }, {} ).toArray( function( error, user ) {
+  self._users.find( { id:name }, {} ).toArray( function( error, user ) {
   	if( error ) { console.log( require('util').inspect( error ) ); }
 		if( user && user[0] && user[0].pass && bcrypt.compareSync( pass, user[0].pass ) ) {
 			return req.session.regenerate( function( error ) {
@@ -90,7 +90,7 @@ Users.prototype.addUser = function( req, res, next ) {
   var pass = req.param( 'password' );
   var name = req.param( 'name' );
   var type = req.param( 'type' );
-  var id   = sanitize( name ).toLowerCase();
+  var id   = sanitize( name );
   if(id) {
     self._users.find( { id:id }, {} ).toArray( function( err, user ) {
       if (err) { console.log( err.msg ); }

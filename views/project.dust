@@ -29,7 +29,7 @@
 		  	  	<div class="bar" style="width:0%" id="alert-bar"></div>
 		  	  </div>
 	  		  <span id="alert-input">
-	  		  	New name: <input class="input" type="text" name="name" autocomplete="off">
+	  		  	New name: <input class="input" type="text" name="name" autocomplete="off" id="alert-name-input">
 	  		  </span>
 	  		</form>
   	  </div>
@@ -142,8 +142,10 @@
 				  	  			{/herokuApps}
 				  	  		  </select>
 				  		<br/>
+				  		{?herokuApps}
 				  		<br/>
 				  	  	<button type="submit" class="btn">Add Heroku App</button>
+				  	  	{/herokuApps}
 				  	  </form>
 				  	  	{/auth}
 				  	  	{?project.herokuApps}
@@ -169,8 +171,10 @@
 				  				{/nodejitsuApps}
 				  			  </select>
 				  		<br/>
+				  		{?nodejitsuApps}
 				  		<br/>
 				  		<button type="submit" class="btn">Add Nodejitsu App</button>
+				  		{/nodejitsuApps}
 				  	</form>
 				  		{/auth}
 				  		{?project.nodejitsuApps}
