@@ -630,7 +630,7 @@
             }),
             status: app.running?"Running v"+app.running.id:"Stopped",
             name: app.name,
-            uri: escape(app.name)
+            uri: encodeURIComponent(app.name)
           };
         });
         locals.project.herokuApps = locals.project.herokuApps.map(function (appName, index) {
@@ -720,15 +720,15 @@
       projects.uploadFile( req, res, next );
     });
 
-    cc.get( '/projects/:uri/downloads/:file', function( req, res, next ) {
+    cc.get( '/projects/:uri/download/:file', function( req, res, next ) {
       projects.streamFile( req, res, next );
     });
 
-    cc.get( '/projects/:uri/remove/:file', function( req, res, next ) {
+    cc.get( '/projects/:uri/remove', function( req, res, next ) {
       projects.removeFile( req, res, next );
     });
 
-    cc.post( '/projects/:uri/update/:file', function( req, res, next ) {
+    cc.post( '/projects/:uri/update', function( req, res, next ) {
       projects.updateFile( req, res, next );
     });
 
@@ -880,7 +880,7 @@
       ];
       var options = {
         projectUser: req.session.name,
-        nodejitsuAppName: unescape(req.params.name)
+        nodejitsuAppName: decodeURIComponent(req.params.name)
       };
       var callback = function (err, locals) {
         if(err) {

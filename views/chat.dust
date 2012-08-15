@@ -1,0 +1,82 @@
+<style type="text/css">
+	.chat-form {
+		position: fixed;
+		right: 0px;
+		bottom: 0px;
+		padding-right: 20px;
+		padding-bottom: 0px;
+		margin-right: 0px;
+		margin-bottom: 0px;
+	}
+	.chat-box {
+		height: 192px;
+		overflow-y: scroll;
+	}
+	.chat-message {
+		padding: 5px 5px 5px 5px;
+		font-size: 15px;
+	}
+</style>
+<div class="pull-right chat-form">
+	<div id="chats">
+		<div class="accordion-group">
+			<div class="accordion-heading">
+				<a class="btn btn-inverse accordion-toggle" href="#" data-toggle="collapse" data-parent="#chats" data-target="#jwilsdon">
+					jwilsdon
+				</a>
+			</div>
+			<div class="accordion-body collapse" id="jwilsdon">
+				<div class="chat-box">
+					<div class="chat-message">jwilsdon: sup</div>
+				</div>
+			</div>
+		</div>
+		<div class="accordion-group">
+			<div class="accordion-heading">
+				<a class="btn btn-inverse accordion-toggle" href="#" data-toggle="collapse" data-parent="#chats" data-target="#proberts">
+					proberts
+				</a>
+			</div>
+			<div class="accordion-body collapse" id="proberts">
+				<div class="chat-box">
+					<div class="chat-message">proberts: hey</div>
+				</div>
+			</div>
+		</div>
+		<div class="accordion-group">
+			<div class="accordion-heading">
+				<a class="btn btn-inverse accordion-toggle" href="#" data-toggle="collapse" data-parent="#chats" data-target="#ForgotPassword">
+					ForgotPassword
+				</a>
+			</div>
+			<div class="accordion-body collapse" id="ForgotPassword">
+				<div class="chat-box">
+					<div class="chat-message">ForgotPassword: hello</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="btn-group dropup input-prepend input-append">
+		<span class="add-on btn-inverse pull-left" style="text-shadow:none">
+			Chat <i class="icon-comment icon-white"></i>
+		</span>
+		<input type="text" class="input pull-left" placeholder="Message" id="chat-input">
+		<button type="button" class="btn btn-inverse">
+			Send <i class="icon-envelope icon-white"></i>
+		</button>
+		<button type="button" class="btn btn-inverse dropdown-toggle" data-toggle="dropdown">
+			Users <i class="icon-user icon-white"></i>
+		</button>
+		<ul class="dropdown-menu pull-right">
+			<li>
+				<a href="#">jwilsdon</a>
+			</li>
+			<li>
+				<a href="#">proberts</a>
+			</li>
+			<li>
+				<a href="#">ForgotPassword</a>
+			</li>
+		</ul>
+	</div>
+</div>

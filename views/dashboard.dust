@@ -70,5 +70,6 @@
 				</div>
 			</div>
 		</div>
+		{>"views/chat.dust"/}
   </body>
 </html>
