@@ -1,3 +1,5 @@
+<script type="text/javascript" src="/socket.io/socket.io.js"></script>
+<script type="text/javascript" src="/js/chat.js"></script>
 <style type="text/css">
 	.chat-form {
 		position: fixed;
@@ -8,75 +10,49 @@
 		margin-right: 0px;
 		margin-bottom: 0px;
 	}
-	.chat-box {
-		height: 192px;
-		overflow-y: scroll;
+	.chat-wrapper, .chat-box {
+		margin-top: 0px;
+		margin-bottom: 0px;
 	}
-	.chat-message {
-		padding: 5px 5px 5px 5px;
-		font-size: 15px;
+	.chat-wrapper {
+		min-height: 64px;
+		max-height: 192px;
+		max-width: 410px;
+		overflow-y: scroll;
+		background-color: #f8f8f8;
+	}
+	.chat-box dt {
+		width: 64px;
+	}
+	.chat-box dd {
+		margin-left: 72px;
 	}
 </style>
 <div class="pull-right chat-form">
-	<div id="chats">
-		<div class="accordion-group">
-			<div class="accordion-heading">
-				<a class="btn btn-inverse accordion-toggle" href="#" data-toggle="collapse" data-parent="#chats" data-target="#jwilsdon">
-					jwilsdon
-				</a>
-			</div>
-			<div class="accordion-body collapse" id="jwilsdon">
-				<div class="chat-box">
-					<div class="chat-message">jwilsdon: sup</div>
-				</div>
-			</div>
-		</div>
-		<div class="accordion-group">
-			<div class="accordion-heading">
-				<a class="btn btn-inverse accordion-toggle" href="#" data-toggle="collapse" data-parent="#chats" data-target="#proberts">
-					proberts
-				</a>
-			</div>
-			<div class="accordion-body collapse" id="proberts">
-				<div class="chat-box">
-					<div class="chat-message">proberts: hey</div>
-				</div>
-			</div>
-		</div>
-		<div class="accordion-group">
-			<div class="accordion-heading">
-				<a class="btn btn-inverse accordion-toggle" href="#" data-toggle="collapse" data-parent="#chats" data-target="#ForgotPassword">
-					ForgotPassword
-				</a>
-			</div>
-			<div class="accordion-body collapse" id="ForgotPassword">
-				<div class="chat-box">
-					<div class="chat-message">ForgotPassword: hello</div>
-				</div>
-			</div>
-		</div>
-	</div>
+	<div id="chat-logs"></div>
 	<div class="btn-group dropup input-prepend input-append">
 		<span class="add-on btn-inverse pull-left" style="text-shadow:none">
 			Chat <i class="icon-comment icon-white"></i>
 		</span>
 		<input type="text" class="input pull-left" placeholder="Message" id="chat-input">
-		<button type="button" class="btn btn-inverse">
+		<button type="button" class="btn btn-inverse" id="chat-post">
 			Send <i class="icon-envelope icon-white"></i>
 		</button>
-		<button type="button" class="btn btn-inverse dropdown-toggle" data-toggle="dropdown">
+		<button type="button" class="btn btn-inverse dropdown-toggle" data-toggle="dropdown" id="chat-button">
 			Users <i class="icon-user icon-white"></i>
 		</button>
-		<ul class="dropdown-menu pull-right">
-			<li>
-				<a href="#">jwilsdon</a>
-			</li>
-			<li>
-				<a href="#">proberts</a>
-			</li>
-			<li>
-				<a href="#">ForgotPassword</a>
-			</li>
-		</ul>
+		<ul class="dropdown-menu pull-right" id="chat-recipients"></ul>
 	</div>
+</div>
+<div class="hidden-phone hidden-tablet hidden-desktop">
+	<input type="hidden" value="{name}" id="username">
+	{?perm}
+		{#projects}
+	<input type="hidden" value="{.uri}" class="roomname">
+		{/projects}
+	{:else}
+		{#clientOf}
+	<input type="hidden" value="{.uri}" class="roomname">
+		{/clientOf}
+	{/perm}
 </div>
