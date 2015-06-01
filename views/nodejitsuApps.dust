@@ -1,0 +1,7 @@
+<ul style="text-align:left">
+	{#project.nodejitsuApps}
+	<li>
+		<a href="/nodejitsuApps/{.uri}">{.name}</a> {.status}
+	</li>
+	{/project.nodejitsuApps}
+</ul>

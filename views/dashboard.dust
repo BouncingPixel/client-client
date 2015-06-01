@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+  	<title>{title}</title>
+  	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0.0">
+  	<link type="text/css" href="/css/bootstrap.css" rel="stylesheet">
+  	<link type="text/css" href="/css/bootstrap-responsive.css" rel="stylesheet">
+  	<script type="text/javascript" src="/js/jquery-1.7.2.min.js"></script>
+  	<script type="text/javascript" src="/js/bootstrap.js"></script>
+  	<!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+  	<!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+  	<div class="container-fluid">
+  		<div class="row-fluid">
+	  		{>"views/user.dust"/}
+	  	</div>
+  		<div class="row-fluid">
+  			{>"views/contents.dust"/}
+  			<div class="span9">
+  				<div class="nav-header">
+						<h3>Dashboard 
+							<small style="text-transform:none">Client Client</small>
+						</h3>
+					</div>
+		  		{?auth}
+		  		<div class="row-fluid">
+			  		<ul class="nav nav-tabs" id="tabs" style="text-align:center">
+			  			<li class="active">
+			  				<a href="#" data-toggle="tab" data-target="#pass">
+			  					Change Password
+			  				</a>
+			  			</li>
+			  			<li>
+			  				<a href="#" data-toggle="tab" data-target="#user">
+			  					Add User
+			  				</a>
+			  			</li>
+			  			<li>
+			  				<a href="#" data-toggle="tab" data-target="#project">
+			  					Add Project
+			  				</a>
+			  			</li>
+			  		</ul>
+			  	</div>
+			  	{/auth}
+			  	<div class="row-fluid tab-content">
+			  		<div class="tab-pane active" id="pass">
+			  			{^perm}
+			  			<hr/>
+			  			<ul class="nav">
+			  				<li class="nav-header">
+			  					<h4>Change Password</h4>
+			  				</li>
+			  			</ul>
+			  			{/perm}
+							{>"views/changePassword.dust"/}
+				  	</div>
+						{?auth}
+						<div class="tab-pane" id="user">
+							{>"views/addUser.dust"/}
+						</div>
+						<div class="tab-pane" id="project">
+							{>"views/addProject.dust"/}
+						</div>
+						{/auth}
+					</div>
+				</div>
+			</div>
+		</div>
+		{>"views/chat.dust"/}
+  </body>
+</html>

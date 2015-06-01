@@ -1,0 +1,23 @@
+{?perm}
+	{?projects}
+		Projects
+		<ul>
+			{#projects}
+				<li style="text-align:left"><a href="/projects/{uri}">{name}</a></li>
+			{/projects}
+		</ul>
+	{:else}
+		No projects!
+	{/projects}
+{:else}
+	{?clientOf}
+		Your Projects
+		<ul>
+			{#clientOf}
+				<li style="text-align:left"><a href="/projects/{uri}">{name}</a></li>
+			{/clientOf}
+		</ul>
+	{:else}
+		You have no projects!
+	{/clientOf}
+{/perm}

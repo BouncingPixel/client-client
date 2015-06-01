@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+  	<title>Project :: {project.name}</title>
+  	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0.0">
+  	<link type="text/css" href="/css/bootstrap.css" rel="stylesheet">
+  	<link type="text/css" href="/css/bootstrap-responsive.css" rel="stylesheet">
+  	<link type="text/css" href="/css/project.css" rel="stylesheet">
+  	<!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+  	<!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <script type="text/javascript" src="/socket.io/socket.io.js"></script>
+    <script type="text/javascript" src="/js/jquery-1.7.2.min.js"></script>
+  	<script type="text/javascript" src="/js/bootstrap.js"></script>
+    <script type="text/javascript" src="/js/project.js"></script>
+  </head>
+  <body>
+  	<div class="modal hide fade" id="overlay" style="text-align:center">
+  		<div class="modal-header">
+  			<button class="close" data-dismiss="modal">&times;</button>
+  	  	<h3>Settings :: <span id="alert-name"></span></h3>
+  	  </div>
+  	  <div class="modal-body">
+	  		<form method="POST" id="alert-form" action="/projects/{project.uri}/update">
+	  		  <input type="hidden" name="container" value="{project.container}">
+		  	  <input type="hidden" name="hash" value="{project.hash}">
+		  	  <input type="hidden" name="path" value="" class="alert-path-value">
+		  	  <div style="display:none" class="progress progress-striped active" id="alert-progress">
+		  	  	<div class="bar" style="width:0%" id="alert-bar"></div>
+		  	  </div>
+	  		  <div class="input-append" id="alert-input">
+	  		  	Filename: <input class="input" type="text" name="name" autocomplete="off" id="alert-name-input">
+	  		  	<button type="button" class="btn btn-inverse" onclick="sendReq(event)">Update <i class="icon-edit icon-white"></i></button>
+	  		  </div>
+	  		</form>
+  	  </div>
+  	  <div class="modal-footer">
+  	  <form method="GET" action="/projects/{project.uri}/remove" style="display:inline">
+  	  	<input type="hidden" name="path" value="" class="alert-path-value">
+  	  	<button type="submit" class="btn btn-danger pull-left">Delete <i class="icon-trash icon-white"></i></button>
+  	  </form>
+  	  <form method="GET" action="/projects/{project.uri}/download" id="download-form" style="display:inline">
+  	  	<input type="hidden" name="path" value="" class="alert-path-value">
+  	  	<button type="submit" class="btn btn-primary">Download <i class="icon-download icon-white"></i></button>
+  	  </form>
+  	  </div>
+  	</div>
+  	<div class="container-fluid">
+  		<div class="row-fluid">
+	  		{>"views/user.dust"/}
+	  	</div>
+  		<div class="row-fluid">
+  			{>"views/contents.dust"/}
+  			<div class="span9">
+			  	<div class="nav-header">
+		  			<h3>Project 
+		  				{#project auth=auth}
+		  				<small style="text-transform:none">{name}</small>
+		  			</h3>
+		  		</div>
+			  	<div class="row-fluid">
+			  		<ul class="nav nav-tabs">
+			  			{?herokuEnabled}
+			  			<li class="active">
+			  				<a href="#" data-toggle="tab" data-target="#herokuapps">
+			  					Heroku Apps
+			  				</a>
+			  			</li>
+			  			{:else}
+			  				{?auth}
+			  			<li>
+			  				<a href="#" data-toggle="tab" data-target="#herokuapps">
+			  					Heroku Apps
+			  				</a>
+			  			</li>
+			  				{/auth}
+			  			{/herokuEnabled}
+			  			{?nodejitsuEnabled}
+			  			<li{^herokuEnabled} class="active"{/herokuEnabled}>
+			  				<a href="#" data-toggle="tab" data-target="#nodejitsuapps">
+			  					Nodejitsu Apps
+			  				</a>
+			  			</li>
+			  			{:else}
+			  				{?auth}
+			  			<li>
+			  				<a href="#" data-toggle="tab" data-target="#nodejitsuapps">
+			  					Nodejitsu Apps
+			  				</a>
+			  			</li>
+			  				{/auth}
+			  			{/nodejitsuEnabled}
+			  			{?sharingEnabled}
+			  			<li{^herokuEnabled}{^nodejitsuEnabled} class="active"{/nodejitsuEnabled}{/herokuEnabled}>
+			  				<a href="#" data-toggle="tab" data-target="#filesharing">
+			  					File Sharing
+			  				</a>
+			  			</li>
+			  			{:else}
+			  				{?auth}
+			  			<li>
+			  				<a href="#" data-toggle="tab" data-target="#filesharing">
+			  					File Sharing
+			  				</a>
+			  			</li>
+			  				{/auth}
+			  			{/sharingEnabled}
+			  			<li{^herokuEnabled}{^nodejitsuEnabled}{^sharingEnabled} class="active"{/sharingEnabled}{/nodejitsuEnabled}{/herokuEnabled}>
+			  				<a href="#" data-toggle="tab" data-target="#projectusers">
+			  					Users
+			  				</a>
+			  			</li>
+			  		</ul>
+			  	</div>
+			  	<div class="row-fluid tab-content">
+				  <div class="tab-pane{^herokuEnabled}{^nodejitsuEnabled}{^sharingEnabled} active{/sharingEnabled}{/nodejitsuEnabled}{/herokuEnabled}" id="projectusers">
+						{?auth}
+							{>"views/joinUser.dust"/}
+						{/auth}
+					    {?users}
+					      <ul>
+					      	<li style="list-style:none;text-align:left">
+					      		<h5>Existing Users</h5>
+					      	</li>
+						  	{#users uri=uri auth=auth}
+							  <li style="text-align:left">
+							  	{.}
+							  	{?auth}
+							  	  <form method="POST" action="/projects/{uri}/removeUser" style="display:inline"> 
+							  	  	<input type="hidden" name="name" value="{.}">
+							  		<button type="submit" class="btn btn-mini"><span style="font-weight:bold">&times;</span></button>
+								  </form>
+								{/auth}
+							  </li>
+							{/users}
+						  </ul>
+					    {:else}
+					      No users!
+					    {/users}
+					  {/project}
+				  </div>
+				  <div class="tab-pane{?project.herokuEnabled} active{/project.herokuEnabled}" id="herokuapps">
+				  	  {?project.herokuEnabled}
+				  	  	{?auth}
+				  	  <form action="/projects/{project.uri}/addHerokuApp" method="POST" class="form-inline">
+				  	  	Name: <select name="appName" {^herokuApps}disabled="disabled"{/herokuApps}>
+				  	  			{#herokuApps}
+				  	  			<option>{.name}</option>
+				  	  			{/herokuApps}
+				  	  		  </select>
+				  		<br/>
+				  		{?herokuApps}
+				  		<br/>
+				  	  	<button type="submit" class="btn">Add Heroku App</button>
+				  	  	{/herokuApps}
+				  	  </form>
+				  	  	{/auth}
+				  	  	{?project.herokuApps}
+				  	  	{>"views/herokuApps.dust"/}
+				  	  	{:else}
+				  	  	No heroku apps!
+				  	  	{/project.herokuApps}
+				  	  {:else}
+				  	  	{?auth}
+				  	  <form action="/projects/{project.uri}/enableHeroku" method="POST" class="form-inline">
+				  	  	<button type="submit" class="btn">Enable Heroku</button>
+				  	  </form>
+				  	  	{/auth}
+				  	  {/project.herokuEnabled}
+				  </div>
+				  <div class="tab-pane{^project.herokuEnabled}{?project.nodejitsuEnabled} active{/project.nodejitsuEnabled}{/project.herokuEnabled}" id="nodejitsuapps">
+				  	{?project.nodejitsuEnabled}
+				  		{?auth}
+				  	<form action="/projects/{project.uri}/addNodejitsuApp" method="POST" class="form-inline">
+				  		Name: <select name="appName" {^nodejitsuApps}disabled="disabled"{/nodejitsuApps}>
+				  				{#nodejitsuApps}
+				  				<option>{.name}</option>
+				  				{/nodejitsuApps}
+				  			  </select>
+				  		<br/>
+				  		{?nodejitsuApps}
+				  		<br/>
+				  		<button type="submit" class="btn">Add Nodejitsu App</button>
+				  		{/nodejitsuApps}
+				  	</form>
+				  		{/auth}
+				  		{?project.nodejitsuApps}
+				  		{>"views/nodejitsuApps.dust"/}
+				  		{:else}
+				  		No nodejitsu apps!
+				  		{/project.nodejitsuApps}
+				  	{:else}
+				  		{?auth}
+				  	<form action="/projects/{project.uri}/enableNodejitsu" method="POST" class="form-inline">
+				  		<button type="submit" class="btn">Enable Nodejitsu</button>
+				  	</form>
+				  		{/auth}
+				  	{/project.nodejitsuEnabled}
+				  </div>
+			  	  <div class="tab-pane{^project.herokuEnabled}{^project.nodejitsuEnabled}{?project.sharingEnabled} active{/project.sharingEnabled}{/project.nodejitsuEnabled}{/project.herokuEnabled}" id="filesharing">
+		  	      	{?auth}
+			  		  <form action="/projects/{project.uri}/enableSharing" method="POST" style="display:inline-block">
+			  		    <input type="checkbox" id="canFileShare"
+			  		    {?project.sharingEnabled}
+			  			  checked="checked" disabled="disabled"> Sharing Enabled
+			  		    {:else}
+			  			  onclick="disable( event );"> Enable Sharing
+			  		    {/project.sharingEnabled}
+			  		  </form>
+			  		  <br/>
+		  		  	{/auth}
+		  		  	{?project.sharingEnabled}
+		  		    <form action="/projects/{project.uri}/upload" method="POST" enctype="multipart/form-data" id="file-upload-form" name="file-upload-form" style="display:inline-block">
+		  		      <input type="hidden" name="container" value="{project.container}">
+		  		  	  <input type="hidden" name="hash" value="{project.hash}">
+		  		  	  <input type="hidden" name="path" value="">
+		  		  	  <div id="progress-bars" style="display:none">
+			  		  		Upload Progress:
+				  		  	<div class="progress progress-striped progress-info active" id="upload-progress">
+				  		  	  <div class="bar" style="width:0%" id="upload-bar"></div>
+				  		  	</div>
+				  		  	Send Progress:
+				  		  	<div class="progress progress-striped progress-success active" id="send-progress">
+				  		  	  <div class="bar" style="width:0%" id="send-bar"></div>
+				  		  	</div>
+				  		  </div>
+			  			  <input type="file" class="input" name="file" multiple="true">
+			  			  <button class="btn btn-mini" onclick="upload(event);" id="upload-btn" rel="tooltip" title="Upload"><i class="icon-upload"></i></button>
+		  		    </form>
+		  		    <br/>
+		  		    {>"views/cloudFiles.dust"/}
+		  		    {/project.sharingEnabled}
+			  	  </div>
+			  	</div>
+		  	</div>
+		  </div>
+		</div>
+		{>"views/chat.dust"/}
+  </body>
+</html>

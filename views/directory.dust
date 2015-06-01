@@ -1,0 +1,38 @@
+{?.isDirectory}
+<div class="collapse file-stats {parentId}" data-toggle="collapse" data-open=".files .{.id}" data-close=".files [class*={.id}]">
+	<div class="file-name" data-sort="{.name}">
+		<div style="display:inline-block;width:{.indent}px">
+			<b class="triangle triangle-right pull-right"></b>
+		</div> 
+		<i class="icon-folder-open"></i> 
+		<div class="name-text">
+			{.name}
+		</div>
+	</div>
+	<div class="file-size" data-sort="{.bytes}">
+		{.size}
+	</div>
+	<div class="file-date" data-sort="{.date}">
+		{.prettyDate}
+	</div>
+</div>
+{#.files uri=uri parentId=.id}
+	{>"views/directory.dust"/}
+{/files}
+{:else}
+<div class="collapse file-stats {parentId}" data-path="{.path}" data-name="{.filename}">
+	<div class="file-name" data-sort="{.name}">
+		<div class="indent" style="width:{.indent}px"></div> 
+		<i class="icon-file"></i> 
+		<div class="name-text" data-content="{.name}">
+			{.name}
+		</div>
+	</div>
+	<div class="file-size" data-sort="{.bytes}">
+		{.size}
+	</div>
+	<div class="file-date" data-sort="{.date}">
+		{.prettyDate}
+	</div>
+</div>
+{/.isDirectory}

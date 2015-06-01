@@ -1,0 +1,7 @@
+<ul style="text-align:left">
+	{#project.herokuApps}
+	<li>
+		<a href="/herokuApps/{.name}">{.name}</a> {.status}
+	</li>
+	{/project.herokuApps}
+</ul>

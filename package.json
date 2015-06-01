@@ -1,0 +1,35 @@
+{
+  "name": "client-client",
+  "version": "0.0.1-18",
+  "dependencies": {
+    "mongodb": "*",
+    "connect-mongodb": "*",
+    "bcrypt": "0.5.x",
+    "async": "0.1.x",
+    "cloudfiles": "https://github.com/BouncingPixel/node-cloudfiles/tarball/master",
+    "express": "3.0.0beta1",
+    "dustjs-linkedin": "*",
+    "consolidate": "*",
+    "bunyan": "0.6.x",
+    "socket.io": "0.9.x",
+    "formidable": "*",
+    "qs": "*",
+    "request": "*",
+    "nodejitsu-api": "*"
+  },
+  "scripts": {
+    "start": "server.js"
+  },
+  "env": {
+    "NODE_ENV": "development",
+    "SUBDOMAIN": "client",
+    "PYTHON": "/opt/local/bin/python2.7.3"
+  },
+  "subdomain": "client-client",
+  "engines": {
+    "node": "0.6.x"
+  },
+  "repository": {},
+  "domains": [],
+  "databases": {}
+}

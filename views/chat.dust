@@ -1,0 +1,58 @@
+<script type="text/javascript" src="/socket.io/socket.io.js"></script>
+<script type="text/javascript" src="/js/chat.js"></script>
+<style type="text/css">
+	.chat-form {
+		position: fixed;
+		right: 0px;
+		bottom: 0px;
+		padding-right: 20px;
+		padding-bottom: 0px;
+		margin-right: 0px;
+		margin-bottom: 0px;
+	}
+	.chat-wrapper, .chat-box {
+		margin-top: 0px;
+		margin-bottom: 0px;
+	}
+	.chat-wrapper {
+		min-height: 64px;
+		max-height: 192px;
+		max-width: 410px;
+		overflow-y: scroll;
+		background-color: #f8f8f8;
+	}
+	.chat-box dt {
+		width: 64px;
+	}
+	.chat-box dd {
+		margin-left: 72px;
+	}
+</style>
+<div class="pull-right chat-form">
+	<div id="chat-logs"></div>
+	<div class="btn-group dropup input-prepend input-append">
+		<span class="add-on btn-inverse pull-left" style="text-shadow:none">
+			Chat <i class="icon-comment icon-white"></i>
+		</span>
+		<input type="text" class="input pull-left" placeholder="Message" id="chat-input">
+		<button type="button" class="btn btn-inverse" id="chat-post">
+			Send <i class="icon-envelope icon-white"></i>
+		</button>
+		<button type="button" class="btn btn-inverse dropdown-toggle" data-toggle="dropdown" id="chat-button">
+			Users <i class="icon-user icon-white"></i>
+		</button>
+		<ul class="dropdown-menu pull-right" id="chat-recipients"></ul>
+	</div>
+</div>
+<div class="hidden-phone hidden-tablet hidden-desktop">
+	<input type="hidden" value="{name}" id="username">
+	{?perm}
+		{#projects}
+	<input type="hidden" value="{.uri}" class="roomname">
+		{/projects}
+	{:else}
+		{#clientOf}
+	<input type="hidden" value="{.uri}" class="roomname">
+		{/clientOf}
+	{/perm}
+</div>

@@ -1,0 +1,82 @@
+<div class="span3">
+	<div class="well">
+		<ul class="nav nav-list">
+			<li class="nav-header"><h4>Contents</h4></li>
+			<li class="nav-header">
+				<a href="/dashboard">
+					<span style="white-space:nowrap">
+					<i class="icon-list"></i> 
+					Dashboard
+				</a>
+			</li>
+		</ul>
+			{?perm}
+				{?users}
+		<ul class="nav nav-list">
+			<li class="nav-header">
+				<a href="#" data-toggle="collapse" data-target="#userlist">
+					<span style="white-space:nowrap">
+						<i class="icon-user"></i> 
+						Users
+					</span>
+				</a>
+			</li>
+		</ul>
+		<ul class="nav nav-list collapse" id="userlist">
+					{#users auth=auth}
+						{?auth}
+			<li><a href="/users/{id}">{name}</a></li>
+						{:else}
+			<li>{name}</li>
+						{/auth}
+					{/users}
+		</ul>
+				{/users}
+				{?projects}
+		<ul class="nav nav-list">
+			<li class="nav-header">
+				<a href="#" data-toggle="collapse" data-target="#projectlist">
+					<span style="white-space:nowrap">
+						<i class="icon-folder-open"></i> 
+						Projects
+					</span>
+				</a>
+			</li>
+		</ul>
+		<ul class="nav nav-list collapse in" id="projectlist">
+					{#projects}
+			<li><a href="/projects/{.uri}">{.name}</a></li>
+					{/projects}
+		</ul>
+				{/projects}
+			{:else}
+				{?clientOf}
+		<ul class="nav nav-list">
+			<li class="nav-header">
+				<a href="#" data-toggle="collapse" data-target="#projectlist">
+					<span style="white-space:nowrap">
+						<i class="icon-folder-open"></i> 
+						Your Projects
+					</span>
+				</a>
+			</li>
+		</ul>
+		<ul class="nav nav-list collapse in" id="projectlist">
+					{#clientOf}
+			<li><a href="/projects/{.uri}">{.name}</a></li>
+					{/clientOf}
+		</ul>
+				{/clientOf}
+			{/perm}
+		<ul class="nav nav-list">
+			<li class="nav-header">
+				<a href="/logout">
+					<span style="white-space:nowrap">
+						<i class="icon-share-alt"></i> 
+						Log Out
+					</span>
+				</a>
+			</li>
+		</ul>
+	</div>
+</div>

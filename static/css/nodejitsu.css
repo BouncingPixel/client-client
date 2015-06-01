@@ -1,0 +1,29 @@
+.files {
+	display:table;
+}
+
+.file-stats {
+	display:table-row;
+}
+
+.file-icon {
+	display:table-cell;
+}
+
+.file-name {
+	display:table-cell;
+	overflow: hidden;
+	text-overflow:ellipsis;
+}
+
+.file-size {
+	display:table-cell;
+	overflow: hidden;
+	text-overflow:ellipsis;
+}
+
+.file-date {
+	display:table-cell;
+	overflow: hidden;
+	text-overflow:ellipsis;
+}
