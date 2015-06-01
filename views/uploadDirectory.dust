@@ -1,8 +1,8 @@
 {?.isDirectory}
 <div class="collapse file-stats {parentId}" data-toggle="collapse" data-open=".directory .{.id}" data-close=".directory [class*={.id}]" onclick="cd('{.path}')">
 	<div class="file-name">
-		<div style="display:inline-block;width:{.indent}px"></div> 
-		<i class="icon-folder-open"></i> 
+		<div style="display:inline-block;width:{.indent}px"></div>
+		<i class="icon-folder-open"></i>
 		<div class="name-text">
 			{.name}
 		</div>
@@ -15,6 +15,6 @@
 	</div>
 </div>
 {#.files parentId=.id}
-	{>"views/uploadDirectory.dust"/}
+	{>"uploadDirectory.dust"/}
 {/files}
 {/.isDirectory}

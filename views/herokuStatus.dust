@@ -19,13 +19,13 @@
   <body onload="loadLog()">
   	<div class="container-fluid">
   		<div class="row-fluid">
-	  		{>"views/user.dust"/}
+	  		{>"user.dust"/}
 	  	</div>
   		<div class="row-fluid">
-  			{>"views/contents.dust"/}
+  			{>"contents.dust"/}
   			<div class="span9">
 	  			<div class="nav-header">
-						<h3>Heroku App 
+						<h3>Heroku App
 							<small style="text-transform:none">{dict.name}</small>
 						</h3>
 					</div>
@@ -37,7 +37,7 @@
 	  				</li>
 	  				<li>
 	  					<a href="#" data-toggle="tab" data-target="#logtab" id="logtext" class="muted">
-	  						Logs 
+	  						Logs
 	  						<i class="icon-refresh" id="logstatus"></i>
 	  					</a>
 	  				</li>
@@ -65,7 +65,7 @@
 				  				<li>Processes
 				  					<ul>
 				  				{#processes}
-				  					<li>{.name} 
+				  					<li>{.name}
 					  					<button class="restart btn btn-mini btn-info" onclick="restart('{.name}')">Restart</button>
 				  						<ul>
 				  						{#.properties}
@@ -88,4 +88,3 @@
 	</div>
   </body>
 </html>
-	  		

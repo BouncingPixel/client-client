@@ -7,26 +7,26 @@
       <span class="btn-small add-on">Sort By:</span>
     </div>
     <a class="btn btn-small dropdown" data-toggle="sort" data-sort="Name" data-class="String">
-      Name 
+      Name
       <b class="triangle muted" style="display:inline-block;">&#x25be;</b>
     </a>
     <a class="btn btn-small dropdown" data-toggle="sort" data-sort="Date Modified" data-class="Date">
-      Date 
+      Date
       <b class="triangle muted" style="display:inline-block;">&#x25be;</b>
     </a>
     <a class="btn btn-small dropdown" data-toggle="sort" data-sort="Content-Type" data-class="String">
-      Content-Type 
+      Content-Type
       <b class="triangle muted" style="display:inline-block;">&#x25be;</b>
     </a>
     <a class="btn btn-small dropdown" data-toggle="sort" data-sort="Size" data-class="Number">
-      Size 
+      Size
       <b class="triangle muted" style="display:inline-block;">&#x25be;</b>
     </a>
   </div>
   <div class="clearfix"></div>
   <div>
     {#files.files uri=project.uri i=""}
-      {>"views/directory.dust"/}
+      {>"directory.dust"/}
     {/files.files}
   </div>
 {/files}

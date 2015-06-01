@@ -16,13 +16,13 @@
   <body>
   	<div class="container-fluid">
   		<div class="row-fluid">
-	  		{>"views/user.dust"/}
+	  		{>"user.dust"/}
 	  	</div>
   		<div class="row-fluid">
-  			{>"views/contents.dust"/}
+  			{>"contents.dust"/}
   			<div class="span9">
 					<div class="nav-header">
-						<h3>User 
+						<h3>User
 							<small style="text-transform:none">{user.name}</small>
 						</h3>
 					</div>
@@ -47,17 +47,17 @@
 				  		<div style="margin-left:5px">
 				  			<form class="form-inline" action="/users/{user.id}/update" method="POST" name="userForm">
 				  			{?user.auth}
-				  				<input name="type" type="radio" class="input" value="admin" checked="checked" onclick="return false"> Admin 
-									<input name="type" type="radio" class="input" value="employee" onclick="updateType()"> Employee 
+				  				<input name="type" type="radio" class="input" value="admin" checked="checked" onclick="return false"> Admin
+									<input name="type" type="radio" class="input" value="employee" onclick="updateType()"> Employee
 									<input name="type" type="radio" class="input" value="client" disabled="disabled" onclick="return false"> Client
 								{:else}
 									{?user.perm}
-									<input name="type" type="radio" class="input" value="admin" onclick="updateType()"> Admin 
-									<input name="type" type="radio" class="input" value="employee" checked="checked" onclick="return false"> Employee 
+									<input name="type" type="radio" class="input" value="admin" onclick="updateType()"> Admin
+									<input name="type" type="radio" class="input" value="employee" checked="checked" onclick="return false"> Employee
 									<input name="type" type="radio" class="input" value="client" disabled="disabled" onclick="return false"> Client
 									{:else}
-									<input name="type" type="radio" class="input" value="admin" disabled="disabled" onclick="return false"> Admin 
-									<input name="type" type="radio" class="input" value="employee" disabled="disabled" onclick="return false"> Employee 
+									<input name="type" type="radio" class="input" value="admin" disabled="disabled" onclick="return false"> Admin
+									<input name="type" type="radio" class="input" value="employee" disabled="disabled" onclick="return false"> Employee
 									<input name="type" type="radio" class="input" value="client" checked="checked" disabled="disabled" onclick="return false"> Client
 									{/user.perm}
 								{/user.auth}

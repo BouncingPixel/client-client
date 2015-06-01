@@ -1,23 +1,23 @@
 {?.isDirectory}
 <div data-toggle="collapse" data-target="#{i}{$idx}" style="font-size:15px">
-	<i class="icon-folder-open"></i> 
-	{.name} 
-	{.size} 
+	<i class="icon-folder-open"></i>
+	{.name}
+	{.size}
 	{.prettyDate}
 </div>
 <div class="collapse" id="{i}{$idx}" style="margin-left:15px">
 	{#.isDirectory j=i k=$idx}
 		{#files i="{j}{k}"}
-			{>"views/directory.dust"/}
+			{>"directory.dust"/}
 		{/files}
 	{/.isDirectory}
 </div>
 {:else}
 <div style="font-size:15px">
 	<span class="pull-left" style="display:inline-block;padding-right:5px">
-		<i class="icon-file"></i> 
-		{.name} 
-		{.size} 
+		<i class="icon-file"></i>
+		{.name}
+		{.size}
 		{.prettyDate}
 	</span>
 	<span class="btn-group">
