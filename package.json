@@ -2,20 +2,20 @@
   "name": "client-client",
   "version": "0.0.1-18",
   "dependencies": {
-    "mongodb": "*",
-    "connect-mongodb": "*",
-    "bcrypt": "0.5.x",
-    "async": "0.1.x",
+    "mongodb": "1.4.x",
+    "connect-mongodb": "1.1.x",
+    "bcrypt": "0.7.x",
+    "async": "0.9.x",
     "cloudfiles": "https://github.com/BouncingPixel/node-cloudfiles/tarball/master",
-    "express": "3.0.0beta1",
-    "dustjs-linkedin": "*",
-    "consolidate": "*",
+    "express": "3.5.x",
+    "dustjs-linkedin": "1.0.x",
+    "consolidate": "https://github.com/BouncingPixel/consolidate.js/tarball/master",
     "bunyan": "0.6.x",
     "socket.io": "0.9.x",
-    "formidable": "*",
-    "qs": "*",
-    "request": "*",
-    "nodejitsu-api": "*"
+    "formidable": "1.0.11",
+    "qs": "0.5.x",
+    "request": "2.55.x",
+    "nodejitsu-api": "0.4.x"
   },
   "scripts": {
     "start": "server.js"
@@ -27,9 +27,12 @@
   },
   "subdomain": "client-client",
   "engines": {
-    "node": "0.6.x"
+    "node": "0.10.x"
   },
-  "repository": {},
+  "repository":
+  { "type": "git",
+    "url": "git@github.com:BouncingPixel/client-client.git"
+  },
   "domains": [],
   "databases": {}
 }

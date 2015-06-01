@@ -21,7 +21,6 @@
   var HerokuClient = require('./HerokuClient').HerokuClient;
   var Users = require('./Users').Users;
   var Projects = require('./Projects').Projects;
-  var SocketIM = require("./SocketIM");
 
   var configuration;
   var cc;
@@ -33,7 +32,6 @@
   var users;
   var projects;
   var njClient;
-  var chat;
 
   var log = new Logger( {
     name:'client-client',
@@ -73,8 +71,6 @@
     });
   };
 
-  // connect to cloud files
-
   var startRackspace = function( callback ) {
     log.info( "RACKSPACE: STARTING" );
     rackspace = new Rackspace( configuration.rackInfo );
@@ -82,16 +78,12 @@
     callback();
   };
 
-  // connect to heroku API
-
   var startHerokuClient = function( callback ) {
     log.info( "HEROKUCLIENT: STARTING" );
     herokuClient = new HerokuClient( configuration.herokuInfo );
     log.info( "HEROKUCLIENT: SUCCESS" );
     callback();
   };
-
-  // connect to nodejitsu API
 
   var startNJClient = function( callback ) {
     log.info( "NODEJITSUCLIENT: STARTING" );
@@ -124,15 +116,6 @@
     callback();
   };
 
-  // set up IM
-
-  var startSocketIM = function( callback ) {
-    log.info( "IM: STARTING" );
-    chat = SocketIM.SocketIM(io, "/chat", SocketIM.excludeXDomain);
-    log.info( "IM: SUCCESS" );
-    callback();
-  };
-
   // set up socket.io
 
   var startSocketIO = function( callback ) {
@@ -157,7 +140,6 @@
       cc.engine('dust', consolidate.dust );
       cc.configure( function() {
         cc.set( 'view engine', 'dust' );
-        cc.set( 'views', __dirname + '/views' );
         cc.use( express.cookieParser( "rawr" ) );
         cc.use( express.session({
           secret: "rawr",
@@ -648,7 +630,7 @@
             }),
             status: app.running?"Running v"+app.running.id:"Stopped",
             name: app.name,
-            uri: encodeURIComponent(app.name)
+            uri: escape(app.name)
           };
         });
         locals.project.herokuApps = locals.project.herokuApps.map(function (appName, index) {
@@ -738,15 +720,15 @@
       projects.uploadFile( req, res, next );
     });
 
-    cc.get( '/projects/:uri/download/:file', function( req, res, next ) {
+    cc.get( '/projects/:uri/downloads/:file', function( req, res, next ) {
       projects.streamFile( req, res, next );
     });
 
-    cc.get( '/projects/:uri/remove', function( req, res, next ) {
+    cc.get( '/projects/:uri/remove/:file', function( req, res, next ) {
       projects.removeFile( req, res, next );
     });
 
-    cc.post( '/projects/:uri/update', function( req, res, next ) {
+    cc.post( '/projects/:uri/update/:file', function( req, res, next ) {
       projects.updateFile( req, res, next );
     });
 
@@ -898,7 +880,7 @@
       ];
       var options = {
         projectUser: req.session.name,
-        nodejitsuAppName: decodeURIComponent(req.params.name)
+        nodejitsuAppName: unescape(req.params.name)
       };
       var callback = function (err, locals) {
         if(err) {
@@ -1147,7 +1129,6 @@
                   startUsers,
                   startExpressConfiguration,
                   startSocketIO,
-                  startSocketIM,
                   startProjects,
                   startExpressRoutes,
                   startExpressListen

@@ -11,7 +11,6 @@ var BufferedStream = function (limit) {
   this.chunks = [];
   this.writable = true;
   this.readable = true;
-  this.headers = {};
 }
 util.inherits(BufferedStream, stream.Stream);
 BufferedStream.prototype.pipe = function (dest, options) {

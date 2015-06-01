@@ -7,8 +7,10 @@ var BufferedStream = require('./BufferedStream').BufferedStream;
 var io;
 var sockets = {};
 
-function randInt(from, to) {
-  return from+Math.floor(Math.random()*(to-from));
+function randomStr(size) {
+  var names = ["bar", "bat", "bay"];
+  var length = names.length;
+  return names[Math.floor(Math.random()*length)];
 }
 
 function sanitize( str ) {
@@ -26,18 +28,19 @@ Array.prototype.channelize = function () {
     files: []
   };
   //formats the files
-  var formatFile = function (file, name, dirPath) {
+  var formatFile = function (file, name) {
     bytes = file.bytes;
     date = new Date(file.lastModified);
     return {
-      name: decodeURIComponent(name),
-      filename: encodeURIComponent(name),
-      path: dirPath+"/"+decodeURIComponent(name),
+      name: unescape(name),
+      filename: name,
+      path: file.name,
       bytes: bytes,
       date: date,
       prettyDate: (date.toDateString().split(" ").slice(1).join(" "))+" "+date.toLocaleTimeString(),
       type: file.contentType,
       size: (function () {
+        var bytes = file.bytes;
         if(bytes < 1024) {
           return bytes+" B";
         } else if(bytes < 1024*1024) {
@@ -54,9 +57,7 @@ Array.prototype.channelize = function () {
   };
   //creates the directory
   self.forEach(function (file) {
-    var path = "";
-    path += decodeURIComponent(file.name);
-    path = path.split("/");
+    var path = unescape("root/"+randomStr()+"/"+file.name).split("/");
     var cwd = root;
     while(path.length) {
       var dir = path.shift();
@@ -74,34 +75,31 @@ Array.prototype.channelize = function () {
             isDirectory: true,
             path: cwd.path+"/"+dir,
             name: dir,
-            dirname: encodeURIComponent(dir),
             files: []
           });
           cwd = cwd.files[index];
         } else {
-          cwd.files.push(formatFile(file, dir, cwd.path)); 
+          cwd.files.push(formatFile(file, dir)); 
         }
       } else {
         if(path.length) {
           cwd = cwd.files[index];
         } else {
-          cwd.files.push(formatFile(file, dir, cwd.path));
+          cwd.files.push(formatFile(file, dir));
         }
       }
     }
   });
   //calculates and sorts the directories
-  (function (dir, indent, id) {
+  (function (dir) {
     var self = arguments.callee;
     var bytes = 0;
     var date;
     var files = dir.files;
     var i = files.length;
-    dir.id = id||"file0";
-    indent = indent||15;
     while(i--) {
       if(files[i].isDirectory) {
-        var stats = self(files[i], indent+15, dir.id+"_"+i);
+        var stats = self(files[i]);
         bytes += stats.bytes;
         if(typeof date === "undefined") {
           date = stats.date;
@@ -109,7 +107,6 @@ Array.prototype.channelize = function () {
           date = stats.date;
         }
       } else {
-        files[i].indent = indent;
         bytes += files[i].bytes;
         if(typeof date === "undefined") {
           date = files[i].date;
@@ -118,10 +115,17 @@ Array.prototype.channelize = function () {
         }
       }
     }
-    dir.indent = indent-15;
+    files.sort(function (a, b) {
+      var comp = a.name.localeCompare(b.name);
+      if(comp === 0) {
+        if(a.isDirectory) return -1;
+        return 1;
+      }
+      return comp;
+    });
     dir.bytes = bytes;
-    dir.date = date||new Date();
-    dir.prettyDate = (dir.date.toDateString().split(" ").slice(1).join(" "))+" "+dir.date.toLocaleTimeString();
+    dir.date = date;
+    dir.prettyDate = (date.toDateString().split(" ").slice(1).join(" "))+" "+date.toLocaleTimeString();
     dir.size = (function () {
       if(bytes < 1024) {
         return bytes+" B";
@@ -150,7 +154,7 @@ var Projects = exports.Projects = function( spec ) {
   this._projects = this._mongo.getCollection( 'projects' );
   this._rackspace = spec.rackspace;
   io = spec.io;
-  io.of("/upload").on("connection", function (socket) {
+  io.sockets.on("connection", function (socket) {
     var hash;
     socket.on("message", function (str) {
       hash = str;
@@ -298,7 +302,6 @@ Projects.prototype.uploadFile = function( req, res, next ) {
       done = false,
       container,
       hash,
-      path,
       verified = false,
       pending = 0,
       sent = 0,
@@ -309,12 +312,12 @@ Projects.prototype.uploadFile = function( req, res, next ) {
       return;
     }
     if (verified) {
-      var file = encodeURIComponent(part.filename);
+      var file = escape(part.filename);
       pending++;
+      part.headers["content-disposition"] = 'form-data; name="'+file+'"; filename="'+file+'"';
       var buffer = new BufferedStream();
-      buffer.headers["content-disposition"] = 'attachment; name="'+file+'"; filename="'+file+'"';
       part.pipe(buffer);
-      self._rackspace.saveStream( container, encodeURIComponent((path?path+"/":"")+file), buffer, function( err, success ) {
+      self._rackspace.saveStream( container, escape(file), buffer, function( err, success ) {
         if (err) {
           console.log( err );
         }
@@ -339,18 +342,15 @@ Projects.prototype.uploadFile = function( req, res, next ) {
           socket.emit("upload", percent);
         });
         break;
-      case "path":
-        path = encodeURIComponent(val.replace(/(?:^\/+|\/+$)|\.\./g, ""));
-        break;
       default:
         var obj = {};
         obj[name] = val;
         console.log(obj);
         break;
     }
-    if(typeof container === "string" && typeof hash === "string" && typeof path === "string") {
+    if(typeof container === "string" && typeof hash === "string") {
       var bcrypt = require( 'bcrypt' );
-      verified = bcrypt.compareSync(container, hash)
+      verified = bcrypt.compareSync(container, hash);
     }
   });
   form.on('error', function(err) {
@@ -384,10 +384,7 @@ Projects.prototype.streamFile = function( req, res, next ) {
   var self = this;
   self.find( req.params.uri, function( err, project ) {
     if ( project && project[0] ) {
-      var path = req.param("path").replace(/(?:^\/+|\/+$)|\.\./g, "");
-      self._rackspace.getStream( project[0].container, path.split("/").map(function (dir) {
-        return encodeURIComponent(encodeURIComponent(dir));
-      }).join("/"), res, function( err, obj ) {
+      self._rackspace.getStream( project[0].container, escape(escape(req.params.file)), res, function( err, obj ) {
         if (err) {
           console.log( err );
         }
@@ -405,10 +402,7 @@ Projects.prototype.removeFile = function( req, res, next ) {
   var self = this;
   self.find( req.params.uri, function( err, project ) {
     if (project && project[0] ) {
-      var path = req.param("path").replace(/(?:^\/+|\/+$)|\.\./g, "");
-      self._rackspace.remove( project[0].container, path.split("/").map(function (dir) {
-        return encodeURIComponent(encodeURIComponent(dir));
-      }).join("/"), function( err, success ) {
+      self._rackspace.remove( project[0].container, escape(escape(req.params.file)), function( err, success ) {
         if (err) {
           console.log(err);
         }
@@ -430,35 +424,23 @@ Projects.prototype.updateFile = function( req, res, next ) {
       bcrypt = require( 'bcrypt' ),
       verified = bcrypt.compareSync(container, hash);
   if ( verified ) {
-    var param = decodeURIComponent(req.param("path")).replace(/(?:^\/+|\/+$)|\.\./g, ""),
-        name = decodeURIComponent(req.param("name")).replace(/\/|\.\./g, ""),
-        path = param.split("/").map(function (dir) {
-          return encodeURIComponent(dir);
-        }),
-        file = path.pop(),
-        ext = file.split(".").pop(),
-        newFile = encodeURIComponent(name+".")+ext,
-        newPath = path.concat([newFile]).map(function (dir) {
-          return encodeURIComponent(dir);
-        }).join("/"),
+    var file = req.params.file,
+        ext = file.split( '.' ).pop(),
+        newFile = escape(req.param( 'name' )+'.'+ext),
         headers = {
-          'content-disposition': 'attachment; name="'+newFile+'"; filename="'+newFile+'"',
-          'destination': '/'+container+'/'+newPath
+          'content-disposition': 'form-data; name="'+newFile+'"; filename="'+newFile+'"',
+          'destination': '/'+container+'/'+escape(newFile)
         };
-    if (encodeURIComponent(file) === newFile) {
+    if (newFile === file) {
       res.send(200);
       return;
     }
-    self._rackspace.renameFile( container, param.split("/").map(function (dir) {
-      return encodeURIComponent(encodeURIComponent(dir));
-    }).join("/"), headers, function (err, success) {
+    self._rackspace.renameFile( container, escape(escape(file)), headers, function (err, success) {
       if (err) {
         console.log(err);
       }
       res.writeContinue();
-      self._rackspace.remove( container, param.split("/").map(function (dir) {
-        return encodeURIComponent(encodeURIComponent(dir));
-      }).join("/"), function( err, success ) {
+      self._rackspace.remove( container, escape(escape(file)), function( err, success ) {
         if (err) {
           console.log(err);
         }

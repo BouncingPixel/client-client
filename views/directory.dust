@@ -1,38 +1,36 @@
 {?.isDirectory}
-<div class="collapse file-stats {parentId}" data-toggle="collapse" data-open=".files .{.id}" data-close=".files [class*={.id}]">
-	<div class="file-name" data-sort="{.name}">
-		<div style="display:inline-block;width:{.indent}px">
-			<b class="triangle triangle-right pull-right"></b>
-		</div> 
-		<i class="icon-folder-open"></i> 
-		<div class="name-text">
-			{.name}
-		</div>
-	</div>
-	<div class="file-size" data-sort="{.bytes}">
-		{.size}
-	</div>
-	<div class="file-date" data-sort="{.date}">
-		{.prettyDate}
-	</div>
+<div data-toggle="collapse" data-target="#{i}{$idx}" style="font-size:15px">
+	<i class="icon-folder-open"></i> 
+	{.name} 
+	{.size} 
+	{.prettyDate}
 </div>
-{#.files uri=uri parentId=.id}
-	{>"views/directory.dust"/}
-{/files}
+<div class="collapse" id="{i}{$idx}" style="margin-left:15px">
+	{#.isDirectory j=i k=$idx}
+		{#files i="{j}{k}"}
+			{>"views/directory.dust"/}
+		{/files}
+	{/.isDirectory}
+</div>
 {:else}
-<div class="collapse file-stats {parentId}" data-path="{.path}" data-name="{.filename}">
-	<div class="file-name" data-sort="{.name}">
-		<div class="indent" style="width:{.indent}px"></div> 
+<div style="font-size:15px">
+	<span class="pull-left" style="display:inline-block;padding-right:5px">
 		<i class="icon-file"></i> 
-		<div class="name-text" data-content="{.name}">
-			{.name}
-		</div>
-	</div>
-	<div class="file-size" data-sort="{.bytes}">
-		{.size}
-	</div>
-	<div class="file-date" data-sort="{.date}">
+		{.name} 
+		{.size} 
 		{.prettyDate}
-	</div>
+	</span>
+	<span class="btn-group">
+		<a class="btn btn-mini" href="/projects/{uri}/downloads/{.path}">
+			<i class="icon-download"></i>
+		</a>
+		<button class="btn btn-mini" onclick="settings('/projects/{uri}/update/{.path}', '{.filename}', '{.path}')">
+			<i class="icon-edit"></i>
+		</button>
+	</span>
+	<a class="btn btn-mini btn-danger pull-right" href="/projects/{uri}/remove/{.path}">
+		<i class="icon-trash"></i>
+	</a>
 </div>
+<div class="clearfix"></div>
 {/.isDirectory}

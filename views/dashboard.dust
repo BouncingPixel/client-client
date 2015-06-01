@@ -15,13 +15,13 @@
   <body>
   	<div class="container-fluid">
   		<div class="row-fluid">
-	  		{>"views/user.dust"/}
+	  		{>"user.dust"/}
 	  	</div>
   		<div class="row-fluid">
-  			{>"views/contents.dust"/}
+  			{>"contents.dust"/}
   			<div class="span9">
   				<div class="nav-header">
-						<h3>Dashboard 
+						<h3>Dashboard
 							<small style="text-transform:none">Client Client</small>
 						</h3>
 					</div>
@@ -56,20 +56,19 @@
 			  				</li>
 			  			</ul>
 			  			{/perm}
-							{>"views/changePassword.dust"/}
+							{>"changePassword.dust"/}
 				  	</div>
 						{?auth}
 						<div class="tab-pane" id="user">
-							{>"views/addUser.dust"/}
+							{>"addUser.dust"/}
 						</div>
 						<div class="tab-pane" id="project">
-							{>"views/addProject.dust"/}
+							{>"addProject.dust"/}
 						</div>
 						{/auth}
 					</div>
 				</div>
 			</div>
 		</div>
-		{>"views/chat.dust"/}
   </body>
 </html>
