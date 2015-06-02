@@ -149,7 +149,7 @@
 				  	  </form>
 				  	  	{/auth}
 				  	  	{?project.herokuApps}
-				  	  	{>"views/herokuApps.dust"/}
+				  	  	{>"herokuApps.dust"/}
 				  	  	{:else}
 				  	  	No heroku apps!
 				  	  	{/project.herokuApps}
@@ -178,7 +178,7 @@
 				  	</form>
 				  		{/auth}
 				  		{?project.nodejitsuApps}
-				  		{>"views/nodejitsuApps.dust"/}
+				  		{>"nodejitsuApps.dust"/}
 				  		{:else}
 				  		No nodejitsu apps!
 				  		{/project.nodejitsuApps}
