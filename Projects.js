@@ -100,6 +100,7 @@ Array.prototype.channelize = function () {
     while(i--) {
       if(files[i].isDirectory) {
         var stats = self(files[i]);
+        console.log(stats);
         bytes += stats.bytes;
         if(typeof date === "undefined") {
           date = stats.date;

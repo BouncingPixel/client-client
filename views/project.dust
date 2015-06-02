@@ -48,7 +48,7 @@
 			  	<div class="nav-header">
 		  			<h3>Project
 		  				{#project auth=auth}
-		  				<small style="text-transform:none">{name}</small>
+              <small style="text-transform:none; margin-left:10px;">{name}</small>
 		  			</h3>
 		  		</div>
 			  	<div class="row-fluid">

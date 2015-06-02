@@ -22,7 +22,7 @@
   			<div class="span9">
   				<div class="nav-header">
 						<h3>Dashboard
-							<small style="text-transform:none">Client Client</small>
+							<small style="text-transform:none; margin-left:10px;">Client Client</small>
 						</h3>
 					</div>
 		  		{?auth}
